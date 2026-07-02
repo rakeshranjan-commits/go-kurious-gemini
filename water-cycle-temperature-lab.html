@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Water Cycle Lab: Temperature and Rainfall</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f8f5;
+      --surface: #ffffff;
+      --surface-soft: #fbfcf7;
+      --ink: #1e2725;
+      --muted: #61716d;
+      --line: #d6ded8;
+      --sky: #d9eef6;
+      --sky-dark: #91c6d9;
+      --water: #2d91b3;
+      --water-dark: #176e8a;
+      --leaf: #3d8b61;
+      --leaf-dark: #256642;
+      --sun: #e8a92f;
+      --orange: #d66b31;
+      --cloud: #e7eef2;
+      --cloud-dark: #9fb0ba;
+      --rain: #247ca8;
+      --violet: #6756ad;
+      --focus: #1f64d8;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(217, 238, 246, 0.78), rgba(244, 248, 245, 0.94) 44%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      padding: clamp(16px, 3vw, 28px) clamp(16px, 4vw, 44px) 10px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(214, 222, 216, 0.78);
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .kicker {
+      margin: 0 0 5px;
+      color: var(--water-dark);
+      font-size: 0.78rem;
+      font-weight: 780;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 3.5vw, 2.75rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: clamp(1.05rem, 2.5vw, 1.45rem);
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    .scorebar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.76);
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--sun);
+      box-shadow: 0 0 0 4px rgba(232, 169, 47, 0.16);
+    }
+
+    main {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      padding: clamp(16px, 3vw, 30px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 370px);
+      gap: clamp(18px, 3vw, 28px);
+      align-items: stretch;
+    }
+
+    .stage-shell,
+    .control-panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 46px rgba(30, 39, 37, 0.08);
+      min-width: 0;
+    }
+
+    .stage-shell {
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .challenge-bar {
+      padding: clamp(16px, 2.4vw, 22px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #fbfcf7);
+    }
+
+    .challenge-copy {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .prompt {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .target-card {
+      min-width: 126px;
+      display: grid;
+      gap: 3px;
+      justify-items: center;
+      padding: 11px 14px;
+      border: 1px solid rgba(45, 145, 179, 0.28);
+      border-radius: 8px;
+      background: #edf8fb;
+      color: var(--water-dark);
+      font-weight: 820;
+    }
+
+    .target-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 780;
+      text-transform: uppercase;
+    }
+
+    .target-value {
+      font-size: clamp(1.1rem, 3vw, 1.42rem);
+      line-height: 1;
+    }
+
+    .workbench {
+      min-height: 540px;
+      padding: clamp(16px, 2.5vw, 24px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
+      gap: clamp(16px, 2.6vw, 24px);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(232, 169, 47, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(244, 248, 245, 0.62));
+    }
+
+    .cycle-zone {
+      position: relative;
+      min-height: 450px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 12px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(251, 252, 247, 0.92)),
+        var(--surface-soft);
+      overflow: hidden;
+    }
+
+    .scene-frame {
+      width: min(100%, 650px);
+      aspect-ratio: 1.34;
+      display: grid;
+      place-items: center;
+      padding: clamp(8px, 2vw, 16px);
+    }
+
+    .cycle-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .sky-bg {
+      fill: url(#skyFill);
+    }
+
+    .hill-back {
+      fill: #a9cdb0;
+    }
+
+    .hill-front {
+      fill: #77b07a;
+    }
+
+    .ground {
+      fill: #d9e6d4;
+    }
+
+    .lake {
+      fill: url(#lakeFill);
+      stroke: var(--water-dark);
+      stroke-width: 2;
+    }
+
+    .lake-shine {
+      stroke: rgba(255, 255, 255, 0.75);
+      stroke-width: 4;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    .sun-core {
+      fill: var(--sun);
+      stroke: #a66618;
+      stroke-width: 2;
+      filter: drop-shadow(0 8px 12px rgba(232, 169, 47, 0.22));
+    }
+
+    .sun-ray {
+      stroke: var(--orange);
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+
+    .cloud-part {
+      stroke: var(--cloud-dark);
+      stroke-width: 2;
+      filter: drop-shadow(0 8px 10px rgba(30, 39, 37, 0.12));
+    }
+
+    .cloud-base {
+      stroke: var(--cloud-dark);
+      stroke-width: 2;
+      filter: drop-shadow(0 8px 10px rgba(30, 39, 37, 0.12));
+    }
+
+    .vapour {
+      fill: none;
+      stroke: var(--water);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 8 10;
+      opacity: 0.24;
+    }
+
+    .arrow {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      marker-end: url(#arrowHead);
+    }
+
+    .evap-arrow {
+      stroke: var(--water);
+    }
+
+    .condense-arrow {
+      stroke: var(--violet);
+    }
+
+    .rain-arrow {
+      stroke: var(--rain);
+    }
+
+    .drop {
+      fill: var(--rain);
+      stroke: #145b7c;
+      stroke-width: 1;
+    }
+
+    .drop.dimmed,
+    .arrow.dimmed,
+    .vapour.dimmed {
+      opacity: 0.12;
+    }
+
+    .cycle-label-bg {
+      fill: rgba(255, 255, 255, 0.92);
+      stroke: rgba(214, 222, 216, 0.95);
+      stroke-width: 1;
+    }
+
+    .svg-label {
+      fill: var(--ink);
+      font-size: 14px;
+      font-weight: 780;
+    }
+
+    .svg-small {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .current-strip {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .strip-item {
+      min-width: 0;
+      padding: 12px 14px;
+      display: grid;
+      gap: 4px;
+      border-right: 1px solid var(--line);
+    }
+
+    .strip-item:last-child {
+      border-right: 0;
+    }
+
+    .strip-label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .strip-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 840;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .stage-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .stage-head {
+      display: grid;
+      gap: 5px;
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .stage-row {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    .stage-row.is-active {
+      border-color: rgba(45, 145, 179, 0.36);
+      background: #edf8fb;
+      color: var(--water-dark);
+    }
+
+    .stage-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .stage-row[data-stage="Evaporation"] .stage-dot {
+      background: var(--sun);
+    }
+
+    .stage-row[data-stage="Condensation"] .stage-dot {
+      background: var(--violet);
+    }
+
+    .stage-row[data-stage="Rainfall"] .stage-dot {
+      background: var(--rain);
+    }
+
+    .stage-row[data-stage="Collection"] .stage-dot {
+      background: var(--leaf);
+    }
+
+    .stage-strength {
+      justify-self: end;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      justify-content: center;
+      border-color: rgba(216, 148, 37, 0.3);
+      color: #8d5c16;
+      background: rgba(216, 148, 37, 0.12);
+    }
+
+    .status-pill.is-correct {
+      color: var(--water-dark);
+      border-color: rgba(45, 145, 179, 0.34);
+      background: rgba(45, 145, 179, 0.1);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .legend-item {
+      min-width: 0;
+      padding: 14px 16px;
+      display: grid;
+      gap: 5px;
+      border-right: 1px solid var(--line);
+    }
+
+    .legend-item:last-child {
+      border-right: 0;
+    }
+
+    .legend-title {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 760;
+      line-height: 1.2;
+    }
+
+    .legend-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      font-weight: 820;
+      line-height: 1.15;
+    }
+
+    .control-panel {
+      padding: clamp(16px, 2.4vw, 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-block {
+      display: grid;
+      gap: 11px;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 11px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #fbfcf7);
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .slider-number {
+      color: var(--water-dark);
+      font-weight: 840;
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--water);
+      cursor: pointer;
+    }
+
+    .scale-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 680;
+    }
+
+    .step-button,
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .step-button {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fbfcfa;
+    }
+
+    .stat.full {
+      grid-column: 1 / -1;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.25;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-value {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      font-weight: 860;
+      line-height: 1;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value.small {
+      font-size: 1.03rem;
+      line-height: 1.28;
+    }
+
+    .actions,
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .preset-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      padding: 11px 12px;
+    }
+
+    .action-button.primary {
+      background: var(--water);
+      border-color: var(--water);
+      color: #ffffff;
+    }
+
+    .action-button.warn {
+      color: #9a4a2a;
+    }
+
+    .preset-button {
+      color: var(--water-dark);
+      background: rgba(45, 145, 179, 0.08);
+      border-color: rgba(45, 145, 179, 0.24);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 760;
+    }
+
+    .toggle-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--water);
+    }
+
+    .observation-line {
+      min-height: 104px;
+      border-left: 5px solid var(--sun);
+      padding: 12px 14px;
+      background: rgba(232, 169, 47, 0.12);
+      border-radius: 0 8px 8px 0;
+      color: #463821;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .hint-line {
+      min-height: 58px;
+      border: 1px solid rgba(45, 145, 179, 0.22);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: rgba(45, 145, 179, 0.08);
+      color: var(--water-dark);
+      font-weight: 690;
+      line-height: 1.38;
+    }
+
+    .quiz-box {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #fbfcf7);
+    }
+
+    .quiz-question {
+      margin: 0;
+      color: var(--ink);
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .quiz-option.is-right {
+      border-color: rgba(45, 145, 179, 0.45);
+      background: rgba(45, 145, 179, 0.12);
+      color: var(--water-dark);
+    }
+
+    .quiz-option.is-wrong {
+      border-color: rgba(214, 107, 49, 0.42);
+      background: rgba(214, 107, 49, 0.1);
+      color: #9a4a2a;
+    }
+
+    .quiz-feedback {
+      min-height: 38px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .confetti-layer {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 9px;
+      height: 14px;
+      border-radius: 3px;
+      animation: confettiFall 900ms ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(68vh) rotate(420deg);
+        opacity: 0;
+      }
+    }
+
+    .step-button:focus-visible,
+    .action-button:focus-visible,
+    .preset-button:focus-visible,
+    .quiz-option:focus-visible,
+    input[type="range"]:focus-visible {
+      outline: 3px solid rgba(31, 100, 216, 0.35);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .step-button,
+      .action-button,
+      .preset-button,
+      .quiz-option {
+        transition: transform 130ms ease, box-shadow 130ms ease, background 130ms ease, border-color 130ms ease;
+      }
+
+      .step-button:hover,
+      .action-button:hover,
+      .preset-button:hover,
+      .quiz-option:hover {
+        transform: translateY(-1px);
+      }
+    }
+
+    @media (max-width: 940px) {
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .scorebar {
+        justify-content: start;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .workbench {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .challenge-bar,
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+
+      .target-card {
+        justify-self: start;
+      }
+
+      .cycle-zone {
+        min-height: 370px;
+      }
+
+      .scene-frame {
+        aspect-ratio: 1.1;
+      }
+
+      .stage-panel {
+        grid-template-rows: auto auto auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      header {
+        padding-inline: 14px;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .current-strip,
+      .legend,
+      .readout,
+      .actions,
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .strip-item,
+      .legend-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .strip-item:last-child,
+      .legend-item:last-child {
+        border-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <p class="kicker">NCERT Classes 4-5 Science</p>
+        <h1>Water Cycle Lab</h1>
+      </div>
+      <div class="scorebar" aria-label="progress">
+        <div class="pill">
+          <span class="pill-dot" aria-hidden="true"></span>
+          Easy Activity
+        </div>
+        <div class="pill" id="xpPill">0 XP</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage-shell" aria-label="temperature controlled water cycle simulator">
+        <div class="challenge-bar">
+          <div class="challenge-copy">
+            <h2 id="challengeTitle">Make rainfall happen</h2>
+            <p class="prompt" id="challengePrompt">Raise the temperature until evaporation builds clouds heavy enough for rain.</p>
+          </div>
+          <div class="target-card" aria-label="target process">
+            <span class="target-label">Target Process</span>
+            <span class="target-value" id="targetValue">Rainfall</span>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="cycle-zone">
+            <div class="scene-frame">
+              <svg id="cycleSvg" class="cycle-svg" viewBox="0 0 760 540" role="img" aria-labelledby="sceneTitle sceneDesc">
+                <title id="sceneTitle">Water cycle changes with temperature</title>
+                <desc id="sceneDesc">A lake, sun, rising water vapour, clouds, and rain show evaporation, condensation, rainfall, and collection.</desc>
+              </svg>
+            </div>
+            <div class="current-strip" aria-label="current water cycle state">
+              <div class="strip-item">
+                <span class="strip-label">Temperature</span>
+                <span id="tempStrip" class="strip-value">24°C</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Main Process</span>
+                <span id="processStrip" class="strip-value">Evaporation</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Rain</span>
+                <span id="rainStrip" class="strip-value">Not yet</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="stage-panel" aria-label="water cycle stages">
+            <div class="stage-head">
+              <h3>Cycle Stages</h3>
+              <p class="prompt">Temperature changes how strongly each stage appears.</p>
+            </div>
+            <div class="stage-list" id="stageList">
+              <div class="stage-row" data-stage="Evaporation">
+                <span class="stage-dot" aria-hidden="true"></span>
+                <span>Evaporation</span>
+                <span class="stage-strength" id="evapStrength">Medium</span>
+              </div>
+              <div class="stage-row" data-stage="Condensation">
+                <span class="stage-dot" aria-hidden="true"></span>
+                <span>Condensation</span>
+                <span class="stage-strength" id="cloudStrength">Growing</span>
+              </div>
+              <div class="stage-row" data-stage="Rainfall">
+                <span class="stage-dot" aria-hidden="true"></span>
+                <span>Rainfall</span>
+                <span class="stage-strength" id="rainStrength">None</span>
+              </div>
+              <div class="stage-row is-active" data-stage="Collection">
+                <span class="stage-dot" aria-hidden="true"></span>
+                <span>Collection</span>
+                <span class="stage-strength">Always</span>
+              </div>
+            </div>
+            <div id="statusPill" class="pill status-pill" aria-live="polite">Need warmer air</div>
+          </aside>
+        </div>
+
+        <div class="legend" aria-label="concept summary">
+          <div class="legend-item">
+            <span class="legend-title">Evaporation</span>
+            <span class="legend-value" id="evapLegend">Water changes into vapour.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Condensation</span>
+            <span class="legend-value" id="cloudLegend">Vapour cools and forms clouds.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Collection</span>
+            <span class="legend-value" id="collectLegend">Rain returns water to lakes.</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="activity controls and observations">
+        <div class="panel-block">
+          <h2>Adjust Temperature</h2>
+          <div class="slider-block">
+            <div class="slider-row">
+              <button class="step-button" type="button" data-step="-1" aria-label="decrease temperature">-</button>
+              <label for="tempSlider">Temperature</label>
+              <span id="tempNumber" class="slider-number">24°C</span>
+              <button class="step-button" type="button" data-step="1" aria-label="increase temperature">+</button>
+            </div>
+            <input id="tempSlider" type="range" min="5" max="45" step="1" value="24" aria-describedby="tempScale">
+            <div id="tempScale" class="scale-row" aria-hidden="true">
+              <span>5°C</span>
+              <span>25°C</span>
+              <span>45°C</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="readout" aria-label="live water cycle values">
+          <div class="stat">
+            <span class="stat-label">Evaporation</span>
+            <span id="evapReadout" class="stat-value">36%</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Cloud Water</span>
+            <span id="cloudReadout" class="stat-value">29%</span>
+          </div>
+          <div class="stat full">
+            <span class="stat-label">What changed?</span>
+            <span id="relationReadout" class="stat-value small">Warm water gives off more vapour. Some vapour cools higher up and makes clouds.</span>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="actions">
+            <button id="checkButton" type="button" class="action-button primary">Check</button>
+            <button id="resetButton" type="button" class="action-button warn">Reset</button>
+            <button id="hintButton" type="button" class="action-button">Hint</button>
+            <button id="newTargetButton" type="button" class="action-button">New Target</button>
+          </div>
+          <div class="preset-grid">
+            <button type="button" class="preset-button" data-temp="10">Cool</button>
+            <button type="button" class="preset-button" data-temp="22">Warm</button>
+            <button type="button" class="preset-button" data-temp="32">Cloudy</button>
+            <button type="button" class="preset-button" data-temp="38">Rain</button>
+          </div>
+          <label class="toggle-row" for="labelToggle">
+            <span>Show labels</span>
+            <input id="labelToggle" type="checkbox" checked>
+          </label>
+        </div>
+
+        <div class="panel-block">
+          <h2>Observation</h2>
+          <div id="observationLine" class="observation-line" aria-live="polite">
+            At 24°C, water evaporates from the lake and begins forming clouds.
+          </div>
+          <div id="hintLine" class="hint-line" hidden>
+            Rain begins when the cloud has collected many tiny water droplets. Try a temperature above 34°C.
+          </div>
+        </div>
+
+        <div class="quiz-box" aria-label="quick question">
+          <h2>Quick Check</h2>
+          <p id="quizQuestion" class="quiz-question">What happens when the Sun heats water in a lake?</p>
+          <div id="quizOptions" class="quiz-options"></div>
+          <div id="quizFeedback" class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+  <script>
+    const state = {
+      temperature: 24,
+      target: "Rainfall",
+      showLabels: true,
+      xp: 0,
+      completed: new Set()
+    };
+
+    const targets = ["Evaporation", "Condensation", "Rainfall"];
+
+    const els = {
+      cycleSvg: document.getElementById("cycleSvg"),
+      tempSlider: document.getElementById("tempSlider"),
+      tempNumber: document.getElementById("tempNumber"),
+      tempStrip: document.getElementById("tempStrip"),
+      processStrip: document.getElementById("processStrip"),
+      rainStrip: document.getElementById("rainStrip"),
+      evapStrength: document.getElementById("evapStrength"),
+      cloudStrength: document.getElementById("cloudStrength"),
+      rainStrength: document.getElementById("rainStrength"),
+      statusPill: document.getElementById("statusPill"),
+      targetValue: document.getElementById("targetValue"),
+      evapReadout: document.getElementById("evapReadout"),
+      cloudReadout: document.getElementById("cloudReadout"),
+      relationReadout: document.getElementById("relationReadout"),
+      evapLegend: document.getElementById("evapLegend"),
+      cloudLegend: document.getElementById("cloudLegend"),
+      collectLegend: document.getElementById("collectLegend"),
+      observationLine: document.getElementById("observationLine"),
+      hintLine: document.getElementById("hintLine"),
+      labelToggle: document.getElementById("labelToggle"),
+      xpPill: document.getElementById("xpPill"),
+      stageList: document.getElementById("stageList"),
+      quizOptions: document.getElementById("quizOptions"),
+      quizFeedback: document.getElementById("quizFeedback"),
+      confettiLayer: document.getElementById("confettiLayer")
+    };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function pct(value) {
+      return Math.round(clamp(value, 0, 1) * 100);
+    }
+
+    function intensity() {
+      const t = state.temperature;
+      const evaporation = clamp((t - 8) / 32, 0, 1);
+      const condensation = clamp((t - 16) / 20, 0, 1);
+      const rainfall = clamp((t - 33) / 8, 0, 1);
+      return { evaporation, condensation, rainfall };
+    }
+
+    function processForTemp() {
+      const levels = intensity();
+      if (levels.rainfall > 0.12) {
+        return "Rainfall";
+      }
+      if (levels.condensation > 0.45) {
+        return "Condensation";
+      }
+      if (levels.evaporation > 0.2) {
+        return "Evaporation";
+      }
+      return "Collection";
+    }
+
+    function strengthText(value) {
+      if (value >= 0.76) {
+        return "Strong";
+      }
+      if (value >= 0.42) {
+        return "Medium";
+      }
+      if (value > 0.08) {
+        return "Low";
+      }
+      return "None";
+    }
+
+    function tempText(value) {
+      return value + "°C";
+    }
+
+    function label(x, y, title, detail) {
+      if (!state.showLabels) {
+        return "";
+      }
+      return [
+        '<g>',
+        '<rect class="cycle-label-bg" x="' + (x - 70) + '" y="' + (y - 23) + '" width="140" height="48" rx="8"></rect>',
+        '<text class="svg-small" x="' + x + '" y="' + (y - 4) + '" text-anchor="middle">' + title + '</text>',
+        '<text class="svg-label" x="' + x + '" y="' + (y + 16) + '" text-anchor="middle">' + detail + '</text>',
+        '</g>'
+      ].join("");
+    }
+
+    function dropsMarkup(rainfall) {
+      const drops = [];
+      const count = Math.round(2 + rainfall * 12);
+      const starts = [306, 338, 370, 402, 434, 466, 498, 530, 354, 386, 418, 450, 482, 514];
+      for (let i = 0; i < count; i += 1) {
+        const x = starts[i % starts.length];
+        const y = 236 + (i % 4) * 32;
+        const h = 20 + rainfall * 12;
+        drops.push('<path class="drop" style="opacity:' + (0.22 + rainfall * 0.72).toFixed(2) + '" d="M ' + x + ' ' + y + ' C ' + (x - 8) + ' ' + (y + 11) + ', ' + (x - 4) + ' ' + (y + h) + ', ' + x + ' ' + (y + h) + ' C ' + (x + 6) + ' ' + (y + h) + ', ' + (x + 8) + ' ' + (y + 11) + ', ' + x + ' ' + y + ' Z"></path>');
+      }
+      return drops.join("");
+    }
+
+    function vapourMarkup(evaporation) {
+      const paths = [];
+      const count = Math.round(2 + evaporation * 8);
+      for (let i = 0; i < count; i += 1) {
+        const x = 130 + i * 31;
+        const sway = i % 2 === 0 ? 18 : -18;
+        const opacity = 0.16 + evaporation * 0.66;
+        paths.push('<path class="vapour" style="opacity:' + opacity.toFixed(2) + '" d="M ' + x + ' 390 C ' + (x + sway) + ' 346, ' + (x - sway) + ' 308, ' + (x + 8) + ' 268"></path>');
+      }
+      return paths.join("");
+    }
+
+    function sunMarkup(evaporation) {
+      const rayOpacity = 0.34 + evaporation * 0.58;
+      const rayLength = 26 + evaporation * 20;
+      const rays = [];
+      const cx = 112;
+      const cy = 110;
+      for (let angle = 0; angle < 360; angle += 45) {
+        const radians = angle * Math.PI / 180;
+        const x1 = cx + Math.cos(radians) * 48;
+        const y1 = cy + Math.sin(radians) * 48;
+        const x2 = cx + Math.cos(radians) * (48 + rayLength);
+        const y2 = cy + Math.sin(radians) * (48 + rayLength);
+        rays.push('<line class="sun-ray" style="opacity:' + rayOpacity.toFixed(2) + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"></line>');
+      }
+      return rays.join("") + '<circle class="sun-core" cx="' + cx + '" cy="' + cy + '" r="' + (34 + evaporation * 10).toFixed(1) + '"></circle>';
+    }
+
+    function cloudMarkup(condensation, rainfall) {
+      const darkness = Math.round(238 - condensation * 48 - rainfall * 26);
+      const fill = "rgb(" + darkness + "," + (darkness + 5) + "," + (darkness + 8) + ")";
+      const scale = 1 + condensation * 0.16 + rainfall * 0.08;
+      return [
+        '<g transform="translate(402 158) scale(' + scale.toFixed(2) + ') translate(-402 -158)">',
+        '<ellipse class="cloud-part" cx="332" cy="166" rx="54" ry="33" fill="' + fill + '"></ellipse>',
+        '<ellipse class="cloud-part" cx="386" cy="142" rx="62" ry="44" fill="' + fill + '"></ellipse>',
+        '<ellipse class="cloud-part" cx="454" cy="164" rx="70" ry="39" fill="' + fill + '"></ellipse>',
+        '<rect class="cloud-base" x="303" y="160" width="218" height="50" rx="25" fill="' + fill + '"></rect>',
+        '</g>'
+      ].join("");
+    }
+
+    function renderSvg() {
+      const levels = intensity();
+      const process = processForTemp();
+      const rainVisible = levels.rainfall > 0.08;
+      els.cycleSvg.innerHTML = [
+        '<defs>',
+        '<linearGradient id="skyFill" x1="0" x2="0" y1="0" y2="1">',
+        '<stop offset="0" stop-color="#d9eef6"></stop>',
+        '<stop offset="1" stop-color="#f5fbff"></stop>',
+        '</linearGradient>',
+        '<linearGradient id="lakeFill" x1="0" x2="1">',
+        '<stop offset="0" stop-color="#56b3cf"></stop>',
+        '<stop offset="1" stop-color="#247ca8"></stop>',
+        '</linearGradient>',
+        '<marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">',
+        '<path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>',
+        '</marker>',
+        '</defs>',
+        '<rect class="sky-bg" x="48" y="74" width="664" height="378" rx="18"></rect>',
+        sunMarkup(levels.evaporation),
+        '<path class="hill-back" d="M 48 356 C 152 274, 224 286, 324 354 C 428 272, 530 276, 712 358 L 712 452 L 48 452 Z"></path>',
+        '<path class="hill-front" d="M 48 382 C 174 320, 286 330, 398 390 C 510 328, 604 326, 712 382 L 712 452 L 48 452 Z"></path>',
+        '<rect class="ground" x="48" y="416" width="664" height="36"></rect>',
+        '<path class="lake" d="M 74 401 C 126 366, 252 360, 330 390 C 388 412, 304 444, 182 442 C 88 441, 26 424, 74 401 Z"></path>',
+        '<path class="lake-shine" d="M 118 404 C 166 391, 230 390, 284 402"></path>',
+        vapourMarkup(levels.evaporation),
+        '<path class="arrow evap-arrow" style="opacity:' + (0.18 + levels.evaporation * 0.78).toFixed(2) + '" d="M 236 374 C 232 318, 264 280, 308 245"></path>',
+        cloudMarkup(levels.condensation, levels.rainfall),
+        '<path class="arrow condense-arrow" style="opacity:' + (0.18 + levels.condensation * 0.78).toFixed(2) + '" d="M 318 236 C 364 212, 438 210, 492 232"></path>',
+        rainVisible ? dropsMarkup(levels.rainfall) : "",
+        '<path class="arrow rain-arrow' + (rainVisible ? "" : " dimmed") + '" style="opacity:' + (rainVisible ? (0.2 + levels.rainfall * 0.76).toFixed(2) : "0.12") + '" d="M 468 230 C 468 286, 452 332, 410 374"></path>',
+        '<path class="arrow rain-arrow" style="opacity:0.62" d="M 420 421 C 344 462, 196 464, 124 430"></path>',
+        label(212, 314, "Evaporation", pct(levels.evaporation) + "%"),
+        label(456, 104, "Condensation", pct(levels.condensation) + "%"),
+        label(552, 294, "Rainfall", rainVisible ? pct(levels.rainfall) + "%" : "not yet"),
+        label(210, 474, "Collection", "water returns"),
+        '<rect class="cycle-label-bg" x="562" y="92" width="106" height="42" rx="8"></rect>',
+        '<text class="svg-small" x="615" y="109" text-anchor="middle">Temperature</text>',
+        '<text class="svg-label" x="615" y="127" text-anchor="middle">' + tempText(state.temperature) + '</text>',
+        '<rect class="cycle-label-bg" x="80" y="198" width="126" height="44" rx="8"></rect>',
+        '<text class="svg-small" x="143" y="215" text-anchor="middle">Main process</text>',
+        '<text class="svg-label" x="143" y="234" text-anchor="middle">' + process + '</text>'
+      ].join("");
+    }
+
+    function updateStageList(process) {
+      els.stageList.querySelectorAll(".stage-row").forEach(function(row) {
+        row.classList.toggle("is-active", row.dataset.stage === process || row.dataset.stage === "Collection");
+      });
+    }
+
+    function updateText() {
+      const levels = intensity();
+      const process = processForTemp();
+      const temp = tempText(state.temperature);
+      const rainReady = process === "Rainfall";
+      els.tempSlider.value = state.temperature;
+      els.tempNumber.textContent = temp;
+      els.tempStrip.textContent = temp;
+      els.processStrip.textContent = process;
+      els.rainStrip.textContent = rainReady ? "Falling" : "Not yet";
+      els.evapStrength.textContent = strengthText(levels.evaporation);
+      els.cloudStrength.textContent = strengthText(levels.condensation);
+      els.rainStrength.textContent = strengthText(levels.rainfall);
+      els.targetValue.textContent = state.target;
+      els.evapReadout.textContent = pct(levels.evaporation) + "%";
+      els.cloudReadout.textContent = pct(levels.condensation) + "%";
+      els.xpPill.textContent = state.xp + " XP";
+      els.evapLegend.textContent = "Sun heats water into vapour.";
+      els.cloudLegend.textContent = "Vapour cools into tiny droplets.";
+      els.collectLegend.textContent = "Rain collects in rivers, lakes, and seas.";
+      updateStageList(process);
+
+      const matched = process === state.target;
+      els.statusPill.classList.toggle("is-correct", matched);
+      els.statusPill.textContent = matched ? "Target matched" : state.target === "Rainfall" ? "Need warmer air" : "Try for " + state.target;
+
+      if (process === "Collection") {
+        els.relationReadout.textContent = "Cool air makes evaporation slow. Most water stays collected in the lake.";
+        els.observationLine.textContent = "At " + temp + ", evaporation is slow. Water mostly remains collected in the lake.";
+      } else if (process === "Evaporation") {
+        els.relationReadout.textContent = "Warm water changes into water vapour and rises into the air.";
+        els.observationLine.textContent = "At " + temp + ", water evaporates from the lake. The vapour rises upward.";
+      } else if (process === "Condensation") {
+        els.relationReadout.textContent = "More vapour rises, cools high above, and condenses into cloud droplets.";
+        els.observationLine.textContent = "At " + temp + ", evaporation is strong and condensation makes the cloud grow.";
+      } else {
+        els.relationReadout.textContent = "The cloud is heavy with droplets, so water falls back as rainfall.";
+        els.observationLine.textContent = "At " + temp + ", the cloud has many droplets. Rain falls and water collects again.";
+      }
+    }
+
+    function render() {
+      renderSvg();
+      updateText();
+      checkAutoAward();
+    }
+
+    function setTemperature(value) {
+      state.temperature = clamp(Math.round(value), 5, 45);
+      render();
+    }
+
+    function checkAutoAward() {
+      const process = processForTemp();
+      const key = state.target + ":" + process + ":" + state.temperature;
+      if (process === state.target && !state.completed.has(key)) {
+        state.completed.add(key);
+        state.xp += 10;
+        els.xpPill.textContent = state.xp + " XP";
+        burstConfetti();
+      }
+    }
+
+    function burstConfetti() {
+      const colors = ["#2d91b3", "#3d8b61", "#e8a92f", "#6756ad", "#d66b31"];
+      els.confettiLayer.innerHTML = "";
+      for (let i = 0; i < 24; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = (10 + Math.random() * 80) + "%";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = (Math.random() * 120) + "ms";
+        piece.style.transform = "rotate(" + (Math.random() * 180) + "deg)";
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(function() {
+        els.confettiLayer.innerHTML = "";
+      }, 1100);
+    }
+
+    function checkAnswer() {
+      const process = processForTemp();
+      if (process === state.target) {
+        els.observationLine.textContent = "Yes. The simulator is showing " + state.target.toLowerCase() + " now.";
+        burstConfetti();
+      } else {
+        els.observationLine.textContent = "Not yet. Current main process is " + process.toLowerCase() + ". Adjust temperature until you see " + state.target.toLowerCase() + ".";
+      }
+    }
+
+    function nextTarget() {
+      const currentIndex = targets.indexOf(state.target);
+      state.target = targets[(currentIndex + 1) % targets.length];
+      render();
+    }
+
+    function renderQuiz() {
+      const options = [
+        { label: "Evaporation", right: true },
+        { label: "Rainfall", right: false },
+        { label: "Collection", right: false },
+        { label: "Freezing", right: false }
+      ];
+      els.quizOptions.innerHTML = "";
+      els.quizFeedback.textContent = "";
+      options.forEach(function(option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "quiz-option";
+        button.textContent = option.label;
+        button.addEventListener("click", function() {
+          answerQuiz(option, button);
+        });
+        els.quizOptions.appendChild(button);
+      });
+    }
+
+    function answerQuiz(option, button) {
+      els.quizOptions.querySelectorAll(".quiz-option").forEach(function(item) {
+        item.classList.remove("is-right", "is-wrong");
+      });
+      button.classList.add(option.right ? "is-right" : "is-wrong");
+      els.quizFeedback.textContent = option.right
+        ? "Correct. Heating changes liquid water into water vapour. This is evaporation."
+        : "Almost. The Sun first causes evaporation by heating water.";
+    }
+
+    els.tempSlider.addEventListener("input", function(event) {
+      setTemperature(Number(event.target.value));
+    });
+    document.querySelectorAll("[data-step]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setTemperature(state.temperature + Number(button.dataset.step));
+      });
+    });
+    document.querySelectorAll("[data-temp]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setTemperature(Number(button.dataset.temp));
+      });
+    });
+    els.labelToggle.addEventListener("change", function(event) {
+      state.showLabels = event.target.checked;
+      render();
+    });
+    document.getElementById("checkButton").addEventListener("click", checkAnswer);
+    document.getElementById("resetButton").addEventListener("click", function() {
+      state.temperature = 24;
+      state.target = "Rainfall";
+      state.showLabels = true;
+      els.labelToggle.checked = true;
+      render();
+    });
+    document.getElementById("hintButton").addEventListener("click", function() {
+      els.hintLine.hidden = !els.hintLine.hidden;
+    });
+    document.getElementById("newTargetButton").addEventListener("click", nextTarget);
+
+    renderQuiz();
+    render();
+  </script>
+</body>
+</html>

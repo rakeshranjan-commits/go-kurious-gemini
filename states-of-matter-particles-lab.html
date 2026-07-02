@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>States of Matter Lab: Heat Particles</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f2;
+      --surface: #ffffff;
+      --surface-soft: #fbfcf7;
+      --ink: #202722;
+      --muted: #62716b;
+      --line: #d8ded4;
+      --ice: #4f9fc0;
+      --ice-dark: #2d6e89;
+      --water: #2d83b6;
+      --water-dark: #1a5f86;
+      --gas: #c06442;
+      --gas-dark: #8f452b;
+      --heat: #e19a2c;
+      --cool: #5aa9c7;
+      --green: #3e8b61;
+      --violet: #6b5bb3;
+      --focus: #1f64d8;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(216, 237, 246, 0.72), rgba(246, 247, 242, 0.94) 44%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      padding: clamp(16px, 3vw, 28px) clamp(16px, 4vw, 44px) 10px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(216, 222, 212, 0.78);
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .kicker {
+      margin: 0 0 5px;
+      color: var(--water-dark);
+      font-size: 0.78rem;
+      font-weight: 780;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 3.5vw, 2.75rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: clamp(1.05rem, 2.5vw, 1.45rem);
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    .scorebar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.76);
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--heat);
+      box-shadow: 0 0 0 4px rgba(225, 154, 44, 0.16);
+    }
+
+    main {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      padding: clamp(16px, 3vw, 30px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 370px);
+      gap: clamp(18px, 3vw, 28px);
+      align-items: stretch;
+    }
+
+    .stage-shell,
+    .control-panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 46px rgba(32, 39, 34, 0.08);
+      min-width: 0;
+    }
+
+    .stage-shell {
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .challenge-bar {
+      padding: clamp(16px, 2.4vw, 22px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #fbfcf7);
+    }
+
+    .challenge-copy {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .prompt {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .target-card {
+      min-width: 116px;
+      display: grid;
+      gap: 3px;
+      justify-items: center;
+      padding: 11px 14px;
+      border: 1px solid rgba(45, 131, 182, 0.28);
+      border-radius: 8px;
+      background: #eef8fb;
+      color: var(--water-dark);
+      font-weight: 820;
+    }
+
+    .target-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 780;
+      text-transform: uppercase;
+    }
+
+    .target-value {
+      font-size: clamp(1.1rem, 3vw, 1.42rem);
+      line-height: 1;
+    }
+
+    .workbench {
+      min-height: 540px;
+      padding: clamp(16px, 2.5vw, 24px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
+      gap: clamp(16px, 2.6vw, 24px);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(225, 154, 44, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(246, 247, 242, 0.62));
+    }
+
+    .matter-zone {
+      position: relative;
+      min-height: 450px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 12px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(251, 252, 247, 0.92)),
+        var(--surface-soft);
+      overflow: hidden;
+    }
+
+    .scene-frame {
+      width: min(100%, 650px);
+      aspect-ratio: 1.34;
+      display: grid;
+      place-items: center;
+      padding: clamp(8px, 2vw, 16px);
+    }
+
+    .matter-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .lab-bg {
+      fill: url(#labFill);
+    }
+
+    .bench {
+      fill: #d7e3dc;
+      stroke: rgba(98, 113, 107, 0.22);
+      stroke-width: 1;
+    }
+
+    .container-glass {
+      fill: rgba(255, 255, 255, 0.42);
+      stroke: #7aa4b7;
+      stroke-width: 4;
+      filter: drop-shadow(0 12px 12px rgba(32, 39, 34, 0.14));
+    }
+
+    .container-back {
+      fill: rgba(215, 235, 243, 0.5);
+      stroke: rgba(122, 164, 183, 0.35);
+      stroke-width: 2;
+    }
+
+    .thermo-body {
+      fill: #ffffff;
+      stroke: rgba(98, 113, 107, 0.42);
+      stroke-width: 2;
+    }
+
+    .thermo-fill {
+      fill: var(--heat);
+    }
+
+    .heat-plate {
+      fill: #46535a;
+      stroke: #1f2722;
+      stroke-width: 2;
+    }
+
+    .heat-glow {
+      fill: rgba(225, 154, 44, 0.22);
+      stroke: rgba(214, 107, 49, 0.42);
+      stroke-width: 2;
+    }
+
+    .cool-glow {
+      fill: rgba(90, 169, 199, 0.2);
+      stroke: rgba(45, 110, 137, 0.38);
+      stroke-width: 2;
+    }
+
+    .particle {
+      stroke: rgba(31, 39, 34, 0.32);
+      stroke-width: 1.6;
+    }
+
+    .particle.solid {
+      fill: var(--ice);
+    }
+
+    .particle.liquid {
+      fill: var(--water);
+    }
+
+    .particle.gas {
+      fill: var(--gas);
+    }
+
+    .motion-line {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      opacity: 0.72;
+    }
+
+    .motion-line.solid {
+      stroke: var(--ice-dark);
+      opacity: 0.28;
+    }
+
+    .motion-line.liquid {
+      stroke: var(--water-dark);
+      opacity: 0.54;
+    }
+
+    .motion-line.gas {
+      stroke: var(--gas-dark);
+      opacity: 0.72;
+      marker-end: url(#motionArrow);
+    }
+
+    .state-label-bg {
+      fill: rgba(255, 255, 255, 0.92);
+      stroke: rgba(216, 222, 212, 0.95);
+      stroke-width: 1;
+    }
+
+    .svg-label {
+      fill: var(--ink);
+      font-size: 14px;
+      font-weight: 780;
+    }
+
+    .svg-small {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .current-strip {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .strip-item {
+      min-width: 0;
+      padding: 12px 14px;
+      display: grid;
+      gap: 4px;
+      border-right: 1px solid var(--line);
+    }
+
+    .strip-item:last-child {
+      border-right: 0;
+    }
+
+    .strip-label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .strip-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 840;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .state-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .state-head {
+      display: grid;
+      gap: 5px;
+    }
+
+    .state-list {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .state-row {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    .state-row.is-active {
+      border-color: rgba(45, 131, 182, 0.36);
+      background: #eef8fb;
+      color: var(--water-dark);
+    }
+
+    .state-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .state-row[data-state="Solid"] .state-dot {
+      background: var(--ice);
+    }
+
+    .state-row[data-state="Liquid"] .state-dot {
+      background: var(--water);
+    }
+
+    .state-row[data-state="Gas"] .state-dot {
+      background: var(--gas);
+    }
+
+    .state-range {
+      justify-self: end;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      justify-content: center;
+      border-color: rgba(225, 154, 44, 0.3);
+      color: #8d5c16;
+      background: rgba(225, 154, 44, 0.12);
+    }
+
+    .status-pill.is-correct {
+      color: var(--water-dark);
+      border-color: rgba(45, 131, 182, 0.34);
+      background: rgba(45, 131, 182, 0.1);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .legend-item {
+      min-width: 0;
+      padding: 14px 16px;
+      display: grid;
+      gap: 5px;
+      border-right: 1px solid var(--line);
+    }
+
+    .legend-item:last-child {
+      border-right: 0;
+    }
+
+    .legend-title {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 760;
+      line-height: 1.2;
+    }
+
+    .legend-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      font-weight: 820;
+      line-height: 1.15;
+    }
+
+    .control-panel {
+      padding: clamp(16px, 2.4vw, 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-block {
+      display: grid;
+      gap: 11px;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 11px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #fbfcf7);
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .slider-number {
+      color: var(--water-dark);
+      font-weight: 840;
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--water);
+      cursor: pointer;
+    }
+
+    .scale-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 680;
+    }
+
+    .step-button,
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .step-button {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fbfcfa;
+    }
+
+    .stat.full {
+      grid-column: 1 / -1;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.25;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-value {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      font-weight: 860;
+      line-height: 1;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value.small {
+      font-size: 1.03rem;
+      line-height: 1.28;
+    }
+
+    .actions,
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .preset-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      padding: 11px 12px;
+    }
+
+    .action-button.primary {
+      background: var(--water);
+      border-color: var(--water);
+      color: #ffffff;
+    }
+
+    .action-button.warn {
+      color: #9a4a2a;
+    }
+
+    .preset-button {
+      color: var(--water-dark);
+      background: rgba(45, 131, 182, 0.08);
+      border-color: rgba(45, 131, 182, 0.24);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 760;
+    }
+
+    .toggle-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--water);
+    }
+
+    .observation-line {
+      min-height: 104px;
+      border-left: 5px solid var(--heat);
+      padding: 12px 14px;
+      background: rgba(225, 154, 44, 0.12);
+      border-radius: 0 8px 8px 0;
+      color: #463821;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .hint-line {
+      min-height: 58px;
+      border: 1px solid rgba(45, 131, 182, 0.22);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: rgba(45, 131, 182, 0.08);
+      color: var(--water-dark);
+      font-weight: 690;
+      line-height: 1.38;
+    }
+
+    .quiz-box {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #fbfcf7);
+    }
+
+    .quiz-question {
+      margin: 0;
+      color: var(--ink);
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .quiz-option.is-right {
+      border-color: rgba(45, 131, 182, 0.45);
+      background: rgba(45, 131, 182, 0.12);
+      color: var(--water-dark);
+    }
+
+    .quiz-option.is-wrong {
+      border-color: rgba(192, 100, 66, 0.42);
+      background: rgba(192, 100, 66, 0.1);
+      color: #8f452b;
+    }
+
+    .quiz-feedback {
+      min-height: 38px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .confetti-layer {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 9px;
+      height: 14px;
+      border-radius: 3px;
+      animation: confettiFall 900ms ease-out forwards;
+    }
+
+    @keyframes particleJiggle {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(2px, -2px);
+      }
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(68vh) rotate(420deg);
+        opacity: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .particle {
+        animation: particleJiggle 900ms ease-in-out infinite;
+        transform-box: fill-box;
+      }
+
+      .particle.liquid {
+        animation-duration: 620ms;
+      }
+
+      .particle.gas {
+        animation-duration: 420ms;
+      }
+
+      .step-button,
+      .action-button,
+      .preset-button,
+      .quiz-option {
+        transition: transform 130ms ease, box-shadow 130ms ease, background 130ms ease, border-color 130ms ease;
+      }
+
+      .step-button:hover,
+      .action-button:hover,
+      .preset-button:hover,
+      .quiz-option:hover {
+        transform: translateY(-1px);
+      }
+    }
+
+    .step-button:focus-visible,
+    .action-button:focus-visible,
+    .preset-button:focus-visible,
+    .quiz-option:focus-visible,
+    input[type="range"]:focus-visible {
+      outline: 3px solid rgba(31, 100, 216, 0.35);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 940px) {
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .scorebar {
+        justify-content: start;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .workbench {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .challenge-bar,
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+
+      .target-card {
+        justify-self: start;
+      }
+
+      .matter-zone {
+        min-height: 370px;
+      }
+
+      .scene-frame {
+        aspect-ratio: 1.1;
+      }
+
+      .state-panel {
+        grid-template-rows: auto auto auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      header {
+        padding-inline: 14px;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .current-strip,
+      .legend,
+      .readout,
+      .actions,
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .strip-item,
+      .legend-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .strip-item:last-child,
+      .legend-item:last-child {
+        border-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <p class="kicker">NCERT Classes 5-6 Science</p>
+        <h1>States of Matter Lab</h1>
+      </div>
+      <div class="scorebar" aria-label="progress">
+        <div class="pill">
+          <span class="pill-dot" aria-hidden="true"></span>
+          Easy Activity
+        </div>
+        <div class="pill" id="xpPill">0 XP</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage-shell" aria-label="particle simulator for states of matter">
+        <div class="challenge-bar">
+          <div class="challenge-copy">
+            <h2 id="challengeTitle">Make a gas</h2>
+            <p class="prompt" id="challengePrompt">Heat the particles until they spread far apart and move freely.</p>
+          </div>
+          <div class="target-card" aria-label="target state">
+            <span class="target-label">Target State</span>
+            <span class="target-value" id="targetValue">Gas</span>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="matter-zone">
+            <div class="scene-frame">
+              <svg id="matterSvg" class="matter-svg" viewBox="0 0 760 540" role="img" aria-labelledby="sceneTitle sceneDesc">
+                <title id="sceneTitle">Particles change behaviour when heated or cooled</title>
+                <desc id="sceneDesc">Particles in a container become solid, liquid, or gas as temperature changes.</desc>
+              </svg>
+            </div>
+            <div class="current-strip" aria-label="current matter state">
+              <div class="strip-item">
+                <span class="strip-label">Temperature</span>
+                <span id="tempStrip" class="strip-value">45°C</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">State</span>
+                <span id="stateStrip" class="strip-value">Liquid</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Particles</span>
+                <span id="particleStrip" class="strip-value">Close, sliding</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="state-panel" aria-label="states of matter">
+            <div class="state-head">
+              <h3>Particle Behaviour</h3>
+              <p class="prompt">Heat adds energy. Cooling removes energy.</p>
+            </div>
+            <div class="state-list" id="stateList">
+              <div class="state-row" data-state="Solid">
+                <span class="state-dot" aria-hidden="true"></span>
+                <span>Solid</span>
+                <span class="state-range">fixed</span>
+              </div>
+              <div class="state-row is-active" data-state="Liquid">
+                <span class="state-dot" aria-hidden="true"></span>
+                <span>Liquid</span>
+                <span class="state-range">sliding</span>
+              </div>
+              <div class="state-row" data-state="Gas">
+                <span class="state-dot" aria-hidden="true"></span>
+                <span>Gas</span>
+                <span class="state-range">free</span>
+              </div>
+            </div>
+            <div id="statusPill" class="pill status-pill" aria-live="polite">Need more heat</div>
+          </aside>
+        </div>
+
+        <div class="legend" aria-label="concept summary">
+          <div class="legend-item">
+            <span class="legend-title">Solid</span>
+            <span class="legend-value" id="solidLegend">Particles are tightly packed.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Liquid</span>
+            <span class="legend-value" id="liquidLegend">Particles stay close but slide.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Gas</span>
+            <span class="legend-value" id="gasLegend">Particles spread out freely.</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="activity controls and observations">
+        <div class="panel-block">
+          <h2>Heat or Cool</h2>
+          <div class="slider-block">
+            <div class="slider-row">
+              <button class="step-button" type="button" data-step="-1" aria-label="cool particles">-</button>
+              <label for="tempSlider">Temperature</label>
+              <span id="tempNumber" class="slider-number">45°C</span>
+              <button class="step-button" type="button" data-step="1" aria-label="heat particles">+</button>
+            </div>
+            <input id="tempSlider" type="range" min="0" max="100" step="1" value="45" aria-describedby="tempScale">
+            <div id="tempScale" class="scale-row" aria-hidden="true">
+              <span>0°C</span>
+              <span>50°C</span>
+              <span>100°C</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="readout" aria-label="live particle values">
+          <div class="stat">
+            <span class="stat-label">Energy</span>
+            <span id="energyReadout" class="stat-value">45%</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">State</span>
+            <span id="stateReadout" class="stat-value">Liquid</span>
+          </div>
+          <div class="stat full">
+            <span class="stat-label">What changed?</span>
+            <span id="relationReadout" class="stat-value small">Particles have enough energy to slide past each other, so the matter behaves like a liquid.</span>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="actions">
+            <button id="checkButton" type="button" class="action-button primary">Check</button>
+            <button id="resetButton" type="button" class="action-button warn">Reset</button>
+            <button id="hintButton" type="button" class="action-button">Hint</button>
+            <button id="newTargetButton" type="button" class="action-button">New Target</button>
+          </div>
+          <div class="preset-grid">
+            <button type="button" class="preset-button" data-temp="15">Solid</button>
+            <button type="button" class="preset-button" data-temp="45">Liquid</button>
+            <button type="button" class="preset-button" data-temp="82">Gas</button>
+          </div>
+          <label class="toggle-row" for="trailToggle">
+            <span>Show motion trails</span>
+            <input id="trailToggle" type="checkbox" checked>
+          </label>
+        </div>
+
+        <div class="panel-block">
+          <h2>Observation</h2>
+          <div id="observationLine" class="observation-line" aria-live="polite">
+            At 45°C, particles are close together but can slide past each other. This is liquid behaviour.
+          </div>
+          <div id="hintLine" class="hint-line" hidden>
+            To make a gas, raise the temperature above 70°C so particles spread far apart.
+          </div>
+        </div>
+
+        <div class="quiz-box" aria-label="quick question">
+          <h2>Quick Check</h2>
+          <p id="quizQuestion" class="quiz-question">In which state are particles tightly packed and only vibrate?</p>
+          <div id="quizOptions" class="quiz-options"></div>
+          <div id="quizFeedback" class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+  <script>
+    const state = {
+      temperature: 45,
+      target: "Gas",
+      showTrails: true,
+      xp: 0,
+      completed: new Set()
+    };
+
+    const targets = ["Solid", "Liquid", "Gas"];
+
+    const els = {
+      matterSvg: document.getElementById("matterSvg"),
+      tempSlider: document.getElementById("tempSlider"),
+      tempNumber: document.getElementById("tempNumber"),
+      tempStrip: document.getElementById("tempStrip"),
+      stateStrip: document.getElementById("stateStrip"),
+      particleStrip: document.getElementById("particleStrip"),
+      stateList: document.getElementById("stateList"),
+      statusPill: document.getElementById("statusPill"),
+      targetValue: document.getElementById("targetValue"),
+      energyReadout: document.getElementById("energyReadout"),
+      stateReadout: document.getElementById("stateReadout"),
+      relationReadout: document.getElementById("relationReadout"),
+      observationLine: document.getElementById("observationLine"),
+      hintLine: document.getElementById("hintLine"),
+      trailToggle: document.getElementById("trailToggle"),
+      xpPill: document.getElementById("xpPill"),
+      quizOptions: document.getElementById("quizOptions"),
+      quizFeedback: document.getElementById("quizFeedback"),
+      confettiLayer: document.getElementById("confettiLayer")
+    };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function tempText(value) {
+      return value + "°C";
+    }
+
+    function matterState() {
+      if (state.temperature <= 25) {
+        return "Solid";
+      }
+      if (state.temperature <= 70) {
+        return "Liquid";
+      }
+      return "Gas";
+    }
+
+    function behaviourText(currentState) {
+      if (currentState === "Solid") {
+        return "Tightly packed";
+      }
+      if (currentState === "Liquid") {
+        return "Close, sliding";
+      }
+      return "Far apart, fast";
+    }
+
+    function relationText(currentState) {
+      if (currentState === "Solid") {
+        return "Particles have low energy. They stay in fixed places and only vibrate.";
+      }
+      if (currentState === "Liquid") {
+        return "Particles have enough energy to slide past each other, so the matter behaves like a liquid.";
+      }
+      return "Particles have high energy. They spread far apart and move freely like a gas.";
+    }
+
+    function observationText(currentState) {
+      if (currentState === "Solid") {
+        return "At " + tempText(state.temperature) + ", particles are packed in a fixed pattern. They vibrate but do not flow.";
+      }
+      if (currentState === "Liquid") {
+        return "At " + tempText(state.temperature) + ", particles are close together but can slide past each other. This is liquid behaviour.";
+      }
+      return "At " + tempText(state.temperature) + ", particles move fast and spread out to fill the container. This is gas behaviour.";
+    }
+
+    function particlePositions(currentState) {
+      if (currentState === "Solid") {
+        const points = [];
+        for (let row = 0; row < 4; row += 1) {
+          for (let col = 0; col < 6; col += 1) {
+            points.push({
+              x: 246 + col * 38 + (row % 2) * 3,
+              y: 284 + row * 36,
+              dx: row % 2 === 0 ? 5 : -5,
+              dy: col % 2 === 0 ? -4 : 4
+            });
+          }
+        }
+        return points;
+      }
+
+      if (currentState === "Liquid") {
+        return [
+          [234, 344, 18, -3], [270, 326, -18, 8], [310, 350, 22, 4], [352, 322, -22, 9],
+          [392, 348, 18, -10], [434, 330, -20, 7], [250, 388, 16, -5], [292, 372, -18, 8],
+          [334, 394, 20, -7], [376, 374, -16, 5], [418, 390, 18, -8], [462, 370, -20, 8],
+          [226, 286, 14, 8], [300, 300, -16, -8], [386, 294, 18, 7], [452, 296, -15, -8]
+        ].map(function(item) {
+          return { x: item[0], y: item[1], dx: item[2], dy: item[3] };
+        });
+      }
+
+      return [
+        [218, 176, 34, -22], [310, 140, -30, 24], [442, 160, 36, 18], [500, 236, -34, -18],
+        [246, 252, 28, 30], [382, 244, -32, 26], [292, 356, 35, -24], [472, 346, -28, -30],
+        [538, 128, -35, 26], [190, 330, 32, -28], [408, 404, -28, -22], [548, 382, -34, -16],
+        [204, 112, 38, 18], [362, 102, -26, 32], [546, 292, -30, 24], [288, 220, 32, -18]
+      ].map(function(item) {
+        return { x: item[0], y: item[1], dx: item[2], dy: item[3] };
+      });
+    }
+
+    function renderParticles(currentState) {
+      const points = particlePositions(currentState);
+      const trails = [];
+      const particles = [];
+      const radius = currentState === "Gas" ? 13 : 15;
+      points.forEach(function(point, index) {
+        if (state.showTrails) {
+          trails.push('<path class="motion-line ' + currentState.toLowerCase() + '" d="M ' + (point.x - point.dx * 0.35).toFixed(1) + ' ' + (point.y - point.dy * 0.35).toFixed(1) + ' L ' + (point.x + point.dx * 0.45).toFixed(1) + ' ' + (point.y + point.dy * 0.45).toFixed(1) + '"></path>');
+        }
+        particles.push('<circle class="particle ' + currentState.toLowerCase() + '" style="animation-delay:' + (index * 42) + 'ms" cx="' + point.x + '" cy="' + point.y + '" r="' + radius + '"></circle>');
+      });
+      return trails.join("") + particles.join("");
+    }
+
+    function renderSvg() {
+      const currentState = matterState();
+      const energy = state.temperature;
+      const thermoHeight = 38 + energy * 1.4;
+      const isGas = currentState === "Gas";
+      const isSolid = currentState === "Solid";
+      els.matterSvg.innerHTML = [
+        '<defs>',
+        '<linearGradient id="labFill" x1="0" x2="0" y1="0" y2="1">',
+        '<stop offset="0" stop-color="#e7f4f7"></stop>',
+        '<stop offset="1" stop-color="#fbfcf7"></stop>',
+        '</linearGradient>',
+        '<marker id="motionArrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">',
+        '<path d="M 0 0 L 9 4.5 L 0 9 z" fill="#8f452b"></path>',
+        '</marker>',
+        '</defs>',
+        '<rect class="lab-bg" x="58" y="72" width="644" height="382" rx="18"></rect>',
+        '<rect class="bench" x="58" y="410" width="644" height="44"></rect>',
+        '<ellipse class="' + (isSolid ? "cool-glow" : "heat-glow") + '" cx="374" cy="420" rx="160" ry="28"></ellipse>',
+        '<rect class="heat-plate" x="258" y="400" width="232" height="28" rx="14"></rect>',
+        '<rect class="container-back" x="172" y="110" width="404" height="292" rx="20"></rect>',
+        '<rect class="container-glass" x="172" y="110" width="404" height="292" rx="20"></rect>',
+        renderParticles(currentState),
+        '<rect class="thermo-body" x="620" y="160" width="28" height="210" rx="14"></rect>',
+        '<circle class="thermo-body" cx="634" cy="388" r="24"></circle>',
+        '<rect class="thermo-fill" x="628" y="' + (354 - thermoHeight).toFixed(1) + '" width="12" height="' + thermoHeight.toFixed(1) + '" rx="6"></rect>',
+        '<circle class="thermo-fill" cx="634" cy="388" r="14"></circle>',
+        '<rect class="state-label-bg" x="86" y="102" width="128" height="50" rx="8"></rect>',
+        '<text class="svg-small" x="150" y="122" text-anchor="middle">Current state</text>',
+        '<text class="svg-label" x="150" y="143" text-anchor="middle">' + currentState + '</text>',
+        '<rect class="state-label-bg" x="560" y="90" width="124" height="50" rx="8"></rect>',
+        '<text class="svg-small" x="622" y="110" text-anchor="middle">Energy</text>',
+        '<text class="svg-label" x="622" y="131" text-anchor="middle">' + energy + '%</text>',
+        '<rect class="state-label-bg" x="100" y="356" width="122" height="48" rx="8"></rect>',
+        '<text class="svg-small" x="161" y="375" text-anchor="middle">' + (isGas ? "Gas fills" : isSolid ? "Solid keeps" : "Liquid takes") + '</text>',
+        '<text class="svg-label" x="161" y="395" text-anchor="middle">' + (isGas ? "container" : isSolid ? "shape" : "container base") + '</text>'
+      ].join("");
+    }
+
+    function updateStateList(currentState) {
+      els.stateList.querySelectorAll(".state-row").forEach(function(row) {
+        row.classList.toggle("is-active", row.dataset.state === currentState);
+      });
+    }
+
+    function updateText() {
+      const currentState = matterState();
+      const matched = currentState === state.target;
+      els.tempSlider.value = state.temperature;
+      els.tempNumber.textContent = tempText(state.temperature);
+      els.tempStrip.textContent = tempText(state.temperature);
+      els.stateStrip.textContent = currentState;
+      els.particleStrip.textContent = behaviourText(currentState);
+      els.energyReadout.textContent = state.temperature + "%";
+      els.stateReadout.textContent = currentState;
+      els.relationReadout.textContent = relationText(currentState);
+      els.observationLine.textContent = observationText(currentState);
+      els.targetValue.textContent = state.target;
+      els.xpPill.textContent = state.xp + " XP";
+      updateStateList(currentState);
+      els.statusPill.classList.toggle("is-correct", matched);
+      if (matched) {
+        els.statusPill.textContent = "Target matched";
+      } else if (state.target === "Gas") {
+        els.statusPill.textContent = "Need more heat";
+      } else if (state.target === "Solid") {
+        els.statusPill.textContent = "Need cooling";
+      } else {
+        els.statusPill.textContent = "Try for liquid";
+      }
+      els.hintLine.textContent = "Solid: 0-25°C. Liquid: 26-70°C. Gas: above 70°C.";
+    }
+
+    function render() {
+      renderSvg();
+      updateText();
+      checkAutoAward();
+    }
+
+    function setTemperature(value) {
+      state.temperature = clamp(Math.round(value), 0, 100);
+      render();
+    }
+
+    function checkAutoAward() {
+      const currentState = matterState();
+      const key = state.target + ":" + currentState + ":" + state.temperature;
+      if (currentState === state.target && !state.completed.has(key)) {
+        state.completed.add(key);
+        state.xp += 10;
+        els.xpPill.textContent = state.xp + " XP";
+        burstConfetti();
+      }
+    }
+
+    function burstConfetti() {
+      const colors = ["#4f9fc0", "#2d83b6", "#c06442", "#e19a2c", "#3e8b61"];
+      els.confettiLayer.innerHTML = "";
+      for (let i = 0; i < 24; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = (10 + Math.random() * 80) + "%";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = (Math.random() * 120) + "ms";
+        piece.style.transform = "rotate(" + (Math.random() * 180) + "deg)";
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(function() {
+        els.confettiLayer.innerHTML = "";
+      }, 1100);
+    }
+
+    function checkAnswer() {
+      const currentState = matterState();
+      if (currentState === state.target) {
+        els.observationLine.textContent = "Yes. The particles are showing " + state.target.toLowerCase() + " behaviour now.";
+        burstConfetti();
+      } else {
+        els.observationLine.textContent = "Not yet. Current state is " + currentState.toLowerCase() + ". Heat or cool until particles show " + state.target.toLowerCase() + " behaviour.";
+      }
+    }
+
+    function nextTarget() {
+      const currentIndex = targets.indexOf(state.target);
+      state.target = targets[(currentIndex + 1) % targets.length];
+      render();
+    }
+
+    function renderQuiz() {
+      const options = [
+        { label: "Solid", right: true },
+        { label: "Liquid", right: false },
+        { label: "Gas", right: false },
+        { label: "Vapour only", right: false }
+      ];
+      els.quizOptions.innerHTML = "";
+      els.quizFeedback.textContent = "";
+      options.forEach(function(option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "quiz-option";
+        button.textContent = option.label;
+        button.addEventListener("click", function() {
+          answerQuiz(option, button);
+        });
+        els.quizOptions.appendChild(button);
+      });
+    }
+
+    function answerQuiz(option, button) {
+      els.quizOptions.querySelectorAll(".quiz-option").forEach(function(item) {
+        item.classList.remove("is-right", "is-wrong");
+      });
+      button.classList.add(option.right ? "is-right" : "is-wrong");
+      els.quizFeedback.textContent = option.right
+        ? "Correct. In a solid, particles are tightly packed and only vibrate."
+        : "Almost. Tightly packed particles that only vibrate describe a solid.";
+    }
+
+    els.tempSlider.addEventListener("input", function(event) {
+      setTemperature(Number(event.target.value));
+    });
+    document.querySelectorAll("[data-step]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setTemperature(state.temperature + Number(button.dataset.step));
+      });
+    });
+    document.querySelectorAll("[data-temp]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setTemperature(Number(button.dataset.temp));
+      });
+    });
+    els.trailToggle.addEventListener("change", function(event) {
+      state.showTrails = event.target.checked;
+      render();
+    });
+    document.getElementById("checkButton").addEventListener("click", checkAnswer);
+    document.getElementById("resetButton").addEventListener("click", function() {
+      state.temperature = 45;
+      state.target = "Gas";
+      state.showTrails = true;
+      els.trailToggle.checked = true;
+      render();
+    });
+    document.getElementById("hintButton").addEventListener("click", function() {
+      els.hintLine.hidden = !els.hintLine.hidden;
+    });
+    document.getElementById("newTargetButton").addEventListener("click", nextTarget);
+
+    renderQuiz();
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heights and Distances: Angle of Elevation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f3;
+      --surface: #ffffff;
+      --ink: #182027;
+      --muted: #5f6b73;
+      --line: #d6ddd8;
+      --pole: #59636b;
+      --pole-dark: #30383f;
+      --ground: #6c8f47;
+      --teal: #087f8c;
+      --teal-dark: #055f68;
+      --amber: #c8751a;
+      --red: #cf4d3f;
+      --sky: #d9eef6;
+      --focus: #195fd7;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(217, 238, 246, 0.52), rgba(246, 247, 243, 0.86) 42%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      padding: clamp(16px, 3vw, 28px) clamp(16px, 4vw, 44px) 10px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(214, 221, 216, 0.72);
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .kicker {
+      margin: 0 0 5px;
+      color: var(--teal-dark);
+      font-size: 0.78rem;
+      font-weight: 760;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.45rem, 3.4vw, 2.65rem);
+      line-height: 1.06;
+      letter-spacing: 0;
+    }
+
+    .level {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.74);
+      font-size: 0.9rem;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .level-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 0 4px rgba(200, 117, 26, 0.14);
+    }
+
+    main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: clamp(16px, 3vw, 30px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: clamp(18px, 3vw, 28px);
+      align-items: stretch;
+    }
+
+    .stage-shell,
+    .control-panel {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 46px rgba(24, 32, 39, 0.08);
+    }
+
+    .stage-shell {
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    .scene-wrap {
+      position: relative;
+      min-height: 480px;
+      background:
+        linear-gradient(180deg, rgba(217, 238, 246, 0.72), rgba(255, 255, 255, 0.72) 58%, rgba(227, 236, 219, 0.94) 58%);
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 480px;
+    }
+
+    .grid-line {
+      stroke: rgba(95, 107, 115, 0.14);
+      stroke-width: 1;
+    }
+
+    .ground-line {
+      stroke: var(--ground);
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    .pole-body {
+      fill: url(#poleGradient);
+      stroke: var(--pole-dark);
+      stroke-width: 1.2;
+    }
+
+    .pole-cap {
+      fill: var(--pole-dark);
+    }
+
+    .sight-line {
+      stroke: var(--red);
+      stroke-width: 4;
+      stroke-linecap: round;
+    }
+
+    .base-line {
+      stroke: var(--teal);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 8 9;
+    }
+
+    .angle-arc {
+      fill: none;
+      stroke: var(--amber);
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+
+    .person-skin {
+      fill: #9b613f;
+    }
+
+    .person-shirt {
+      fill: var(--teal);
+    }
+
+    .person-trouser {
+      stroke: #34434b;
+      stroke-width: 8;
+      stroke-linecap: round;
+    }
+
+    .person-line {
+      stroke: #34434b;
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+
+    .label-bg {
+      fill: rgba(255, 255, 255, 0.88);
+      stroke: rgba(214, 221, 216, 0.92);
+      stroke-width: 1;
+    }
+
+    .svg-label {
+      fill: var(--ink);
+      font-size: 15px;
+      font-weight: 730;
+    }
+
+    .svg-small {
+      fill: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .legend-item {
+      min-width: 0;
+      padding: 14px 16px;
+      display: grid;
+      gap: 5px;
+      border-right: 1px solid var(--line);
+    }
+
+    .legend-item:last-child {
+      border-right: 0;
+    }
+
+    .legend-title {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 720;
+      line-height: 1.2;
+    }
+
+    .legend-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .control-panel {
+      padding: clamp(16px, 2.4vw, 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .panel-head {
+      display: grid;
+      gap: 7px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.17rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .panel-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.44;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fbfcfa;
+      min-width: 0;
+    }
+
+    .stat.full {
+      grid-column: 1 / -1;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 760;
+      line-height: 1.25;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-value {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      font-weight: 850;
+      line-height: 1;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value.small {
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #f8faf7);
+    }
+
+    .slider-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .slider-number {
+      color: var(--teal-dark);
+      font-weight: 840;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+
+    .scale-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 680;
+    }
+
+    .observation {
+      margin-top: auto;
+      padding-top: 4px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .observation-line {
+      min-height: 84px;
+      border-left: 5px solid var(--amber);
+      padding: 12px 14px;
+      background: rgba(200, 117, 26, 0.08);
+      border-radius: 0 8px 8px 0;
+      color: #3e3327;
+      font-size: 0.96rem;
+      line-height: 1.45;
+      font-weight: 610;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      font-size: 0.9rem;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      padding: 9px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mini-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .mini-table th {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      background: #f5f7f2;
+    }
+
+    .mini-table td {
+      color: var(--ink);
+      font-weight: 680;
+    }
+
+    @media (max-width: 860px) {
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .scene-wrap,
+      svg {
+        min-height: 390px;
+      }
+
+      .control-panel {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      header {
+        padding-inline: 14px;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .legend {
+        grid-template-columns: 1fr;
+      }
+
+      .legend-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .legend-item:last-child {
+        border-bottom: 0;
+      }
+
+      .readout {
+        grid-template-columns: 1fr;
+      }
+
+      .scene-wrap,
+      svg {
+        min-height: 340px;
+      }
+
+      .svg-label {
+        font-size: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .sight-line,
+      .base-line,
+      .angle-arc,
+      .person-group,
+      .label-group {
+        transition: transform 160ms ease, d 160ms ease, x 160ms ease, y 160ms ease;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <p class="kicker">NCERT Class 8 Mathematics</p>
+        <h1>Heights and Distances</h1>
+      </div>
+      <div class="level" aria-label="Activity level">
+        <span class="level-dot" aria-hidden="true"></span>
+        Medium Activity
+      </div>
+    </header>
+
+    <main>
+      <section class="stage-shell" aria-label="Pole, observer, and angle of elevation diagram">
+        <div class="scene-wrap">
+          <svg id="scene" viewBox="0 0 900 560" role="img" aria-labelledby="sceneTitle sceneDesc">
+            <title id="sceneTitle">Angle of elevation changes as the observer moves away from a pole</title>
+            <desc id="sceneDesc">A pole stands at the left. A person on the ground moves horizontally away. The sight line from the person's eye to the top of the pole forms an angle with the ground.</desc>
+            <defs>
+              <linearGradient id="poleGradient" x1="0" x2="1">
+                <stop offset="0" stop-color="#7c8790"></stop>
+                <stop offset="0.5" stop-color="#eef1ef"></stop>
+                <stop offset="1" stop-color="#505a62"></stop>
+              </linearGradient>
+              <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf4d3f"></path>
+              </marker>
+            </defs>
+
+            <g id="grid"></g>
+            <path class="ground-line" d="M 78 458 H 828"></path>
+
+            <g aria-label="pole">
+              <rect class="pole-body" x="118" y="128" width="34" height="330" rx="4"></rect>
+              <rect class="pole-cap" x="110" y="112" width="50" height="18" rx="4"></rect>
+              <circle cx="135" cy="112" r="9" fill="#f0c34a" stroke="#7d6716" stroke-width="2"></circle>
+              <line x1="168" y1="128" x2="168" y2="458" stroke="#59636b" stroke-width="2" stroke-dasharray="7 7"></line>
+              <rect class="label-bg" x="74" y="86" width="124" height="32" rx="8"></rect>
+              <text class="svg-label" x="136" y="107" text-anchor="middle">Pole: 12 m</text>
+            </g>
+
+            <line id="baseLine" class="base-line" x1="135" y1="458" x2="530" y2="458"></line>
+            <line id="sightLine" class="sight-line" x1="530" y1="407" x2="135" y2="112" marker-end="url(#arrowHead)"></line>
+            <path id="angleArc" class="angle-arc" d=""></path>
+
+            <g id="personGroup" class="person-group" aria-label="observer">
+              <circle class="person-skin" cx="530" cy="392" r="16"></circle>
+              <path class="person-shirt" d="M 508 431 Q 530 406 552 431 L 545 458 H 515 Z"></path>
+              <path class="person-line" d="M 515 431 L 494 446"></path>
+              <path class="person-line" d="M 545 431 L 566 444"></path>
+              <path class="person-trouser" d="M 519 456 L 511 494"></path>
+              <path class="person-trouser" d="M 541 456 L 552 494"></path>
+              <circle cx="524" cy="390" r="2.6" fill="#172026"></circle>
+              <circle cx="539" cy="390" r="2.6" fill="#172026"></circle>
+            </g>
+
+            <g id="angleLabel" class="label-group">
+              <rect class="label-bg" x="466" y="420" width="122" height="34" rx="8"></rect>
+              <text id="angleSvgText" class="svg-label" x="527" y="442" text-anchor="middle">37.3°</text>
+            </g>
+
+            <g id="distanceLabel" class="label-group">
+              <rect class="label-bg" x="282" y="468" width="142" height="32" rx="8"></rect>
+              <text id="distanceSvgText" class="svg-small" x="353" y="489" text-anchor="middle">Distance: 10 m</text>
+            </g>
+
+            <g id="heightDiffLabel" class="label-group">
+              <rect class="label-bg" x="176" y="244" width="176" height="32" rx="8"></rect>
+              <text id="heightDiffSvgText" class="svg-small" x="264" y="265" text-anchor="middle">Vertical gap: 10.5 m</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="legend" aria-label="live values">
+          <div class="legend-item">
+            <span class="legend-title">Horizontal distance</span>
+            <span id="legendDistance" class="legend-value">10 m</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Angle of elevation</span>
+            <span id="legendAngle" class="legend-value">46.4°</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Line of sight</span>
+            <span id="legendSight" class="legend-value">14.5 m</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="activity controls and observations">
+        <div class="panel-head">
+          <h2>Observer Position</h2>
+          <p class="panel-note">The pole is fixed at 12 m and the observer’s eye level is 1.5 m.</p>
+        </div>
+
+        <div class="slider-block">
+          <div class="slider-row">
+            <label for="distanceSlider">Distance from pole</label>
+            <span id="distanceNumber" class="slider-number">10 m</span>
+          </div>
+          <input id="distanceSlider" type="range" min="2" max="30" step="0.5" value="10" aria-describedby="distanceRange">
+          <div id="distanceRange" class="scale-row" aria-hidden="true">
+            <span>2 m</span>
+            <span>30 m</span>
+          </div>
+        </div>
+
+        <div class="readout">
+          <div class="stat">
+            <span class="stat-label">Angle θ</span>
+            <span id="angleReadout" class="stat-value">46.4°</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">tan θ</span>
+            <span id="tanReadout" class="stat-value">1.05</span>
+          </div>
+          <div class="stat full">
+            <span class="stat-label">Relation</span>
+            <span id="formulaReadout" class="stat-value small">tan θ = 10.5 ÷ 10 = 1.05</span>
+          </div>
+        </div>
+
+        <div class="observation">
+          <div id="observationLine" class="observation-line" aria-live="polite">
+            At 10 m from the pole, the angle of elevation is 46.4°. Moving farther away makes the angle smaller.
+          </div>
+
+          <table class="mini-table" aria-label="comparison of distance and angle">
+            <thead>
+              <tr>
+                <th>Distance</th>
+                <th>Angle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="nearDistance">5 m</td>
+                <td id="nearAngle">64.5°</td>
+              </tr>
+              <tr>
+                <td id="currentDistance">10 m</td>
+                <td id="currentAngle">46.4°</td>
+              </tr>
+              <tr>
+                <td id="farDistance">20 m</td>
+                <td id="farAngle">27.7°</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const slider = document.getElementById("distanceSlider");
+    const distanceNumber = document.getElementById("distanceNumber");
+    const angleReadout = document.getElementById("angleReadout");
+    const tanReadout = document.getElementById("tanReadout");
+    const formulaReadout = document.getElementById("formulaReadout");
+    const observationLine = document.getElementById("observationLine");
+    const legendDistance = document.getElementById("legendDistance");
+    const legendAngle = document.getElementById("legendAngle");
+    const legendSight = document.getElementById("legendSight");
+    const sightLine = document.getElementById("sightLine");
+    const baseLine = document.getElementById("baseLine");
+    const angleArc = document.getElementById("angleArc");
+    const personGroup = document.getElementById("personGroup");
+    const angleLabel = document.getElementById("angleLabel");
+    const distanceLabel = document.getElementById("distanceLabel");
+    const distanceSvgText = document.getElementById("distanceSvgText");
+    const angleSvgText = document.getElementById("angleSvgText");
+    const currentDistance = document.getElementById("currentDistance");
+    const currentAngle = document.getElementById("currentAngle");
+    const nearDistance = document.getElementById("nearDistance");
+    const nearAngle = document.getElementById("nearAngle");
+    const farDistance = document.getElementById("farDistance");
+    const farAngle = document.getElementById("farAngle");
+    const grid = document.getElementById("grid");
+
+    const poleHeight = 12;
+    const eyeHeight = 1.5;
+    const verticalGap = poleHeight - eyeHeight;
+    const groundY = 458;
+    const poleX = 135;
+    const poleTopY = 112;
+    const eyeYOffset = 51;
+    const metersToPixels = 19.2;
+    const minDistance = Number(slider.min);
+    const maxDistance = Number(slider.max);
+    const minPersonX = 238;
+    const maxPersonX = 806;
+    const initialPersonX = 530;
+
+    function makeGrid() {
+      const fragment = document.createDocumentFragment();
+      for (let x = 96; x <= 816; x += 72) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x);
+        line.setAttribute("x2", x);
+        line.setAttribute("y1", 86);
+        line.setAttribute("y2", 458);
+        line.setAttribute("class", "grid-line");
+        fragment.appendChild(line);
+      }
+      for (let y = 122; y <= 434; y += 48) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", 78);
+        line.setAttribute("x2", 828);
+        line.setAttribute("y1", y);
+        line.setAttribute("y2", y);
+        line.setAttribute("class", "grid-line");
+        fragment.appendChild(line);
+      }
+      grid.appendChild(fragment);
+    }
+
+    function formatMeters(value) {
+      return Number.isInteger(value) ? `${value} m` : `${value.toFixed(1)} m`;
+    }
+
+    function angleForDistance(distance) {
+      return Math.atan(verticalGap / distance) * 180 / Math.PI;
+    }
+
+    function personXForDistance(distance) {
+      const progress = (distance - minDistance) / (maxDistance - minDistance);
+      return minPersonX + progress * (maxPersonX - minPersonX);
+    }
+
+    function arcPath(cx, cy, radius, degrees) {
+      const endX = cx - Math.cos(degrees * Math.PI / 180) * radius;
+      const endY = cy - Math.sin(degrees * Math.PI / 180) * radius;
+      return `M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 0 ${endX} ${endY}`;
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function update() {
+      const distance = Number(slider.value);
+      const angle = angleForDistance(distance);
+      const angleText = `${angle.toFixed(1)}°`;
+      const tanValue = verticalGap / distance;
+      const sight = Math.hypot(verticalGap, distance);
+      const distanceText = formatMeters(distance);
+      const personX = personXForDistance(distance);
+      const eyeX = personX;
+      const eyeY = groundY - eyeYOffset;
+
+      personGroup.setAttribute("transform", `translate(${personX - initialPersonX} 0)`);
+      sightLine.setAttribute("x1", eyeX);
+      sightLine.setAttribute("y1", eyeY);
+      sightLine.setAttribute("x2", poleX);
+      sightLine.setAttribute("y2", poleTopY);
+      baseLine.setAttribute("x1", poleX);
+      baseLine.setAttribute("y1", groundY);
+      baseLine.setAttribute("x2", eyeX);
+      baseLine.setAttribute("y2", groundY);
+      angleArc.setAttribute("d", arcPath(eyeX, eyeY, 48, angle));
+
+      const labelX = Math.max(264, Math.min(744, eyeX - 62));
+      angleLabel.setAttribute("transform", `translate(${labelX - 466} ${eyeY + 20 - 420})`);
+      angleSvgText.textContent = angleText;
+
+      const distanceLabelX = (poleX + eyeX) / 2 - 71;
+      distanceLabel.setAttribute("transform", `translate(${distanceLabelX - 282} 0)`);
+      distanceSvgText.textContent = `Distance: ${distanceText}`;
+
+      distanceNumber.textContent = distanceText;
+      angleReadout.textContent = angleText;
+      tanReadout.textContent = tanValue.toFixed(2);
+      formulaReadout.textContent = `tan θ = ${verticalGap.toFixed(1)} ÷ ${distanceText.replace(" m", "")} = ${tanValue.toFixed(2)}`;
+      legendDistance.textContent = distanceText;
+      legendAngle.textContent = angleText;
+      legendSight.textContent = `${sight.toFixed(1)} m`;
+      currentDistance.textContent = distanceText;
+      currentAngle.textContent = angleText;
+
+      const closeDistance = Math.max(minDistance, distance / 2);
+      const farDistanceValue = Math.min(maxDistance, distance * 2);
+      nearDistance.textContent = formatMeters(closeDistance);
+      nearAngle.textContent = `${angleForDistance(closeDistance).toFixed(1)}°`;
+      farDistance.textContent = formatMeters(farDistanceValue);
+      farAngle.textContent = `${angleForDistance(farDistanceValue).toFixed(1)}°`;
+
+      const trend = distance < 8
+        ? "The observer is close, so the top of the pole appears steeply above eye level."
+        : distance > 20
+          ? "The observer is far away, so the line of sight becomes flatter."
+          : "Moving farther away makes the angle smaller; moving closer makes it larger.";
+      observationLine.textContent = `At ${distanceText} from the pole, the angle of elevation is ${angleText}. ${trend}`;
+    }
+
+    makeGrid();
+    slider.addEventListener("input", update);
+    update();
+  </script>
+</body>
+</html>

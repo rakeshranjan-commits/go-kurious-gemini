@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Chain Lab: Drag Organisms</title>
+  <style>
+    :root {
+      --ink: #233038;
+      --muted: #60727b;
+      --paper: #fbfcf6;
+      --panel: #ffffff;
+      --line: #dbe5de;
+      --green: #2f9b67;
+      --green-dark: #1f754e;
+      --teal: #168596;
+      --orange: #e47c3f;
+      --gold: #f2b84b;
+      --red: #d95a4f;
+      --blue: #3d79c8;
+      --violet: #7567c9;
+      --shadow: 0 18px 45px rgba(35, 48, 56, 0.14);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 10%, rgba(242, 184, 75, 0.2), transparent 26%),
+        radial-gradient(circle at 84% 18%, rgba(47, 155, 103, 0.15), transparent 25%),
+        linear-gradient(135deg, #f0faf5 0%, #fbfcf6 48%, #fff1e5 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr auto;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border: 1px solid rgba(47, 155, 103, 0.22);
+      border-radius: 999px;
+      color: var(--green-dark);
+      background: rgba(255, 255, 255, 0.78);
+      font-size: 0.82rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 790px;
+      font-size: clamp(2rem, 5vw, 4.55rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .score-card {
+      min-width: 172px;
+      padding: 16px;
+      border: 1px solid rgba(35, 48, 56, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: var(--shadow);
+    }
+
+    .score-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .score-value {
+      margin-top: 6px;
+      font-size: 2rem;
+      font-weight: 950;
+      color: var(--green-dark);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 354px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .lab-card,
+    .side-panel,
+    .info-panel {
+      border: 1px solid rgba(35, 48, 56, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.91);
+      box-shadow: var(--shadow);
+    }
+
+    .lab-card {
+      overflow: hidden;
+    }
+
+    .lab-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .challenge {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .target-pill,
+    .status-pill,
+    .mini-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .target-pill {
+      color: #6f3900;
+      background: #fff0cf;
+      border: 1px solid rgba(242, 184, 75, 0.58);
+    }
+
+    .status-pill {
+      color: #7d3518;
+      background: #ffe6d8;
+      border: 1px solid rgba(228, 124, 63, 0.32);
+    }
+
+    .status-pill.is-matched {
+      color: #17623b;
+      background: #def7e8;
+      border-color: rgba(47, 155, 103, 0.42);
+    }
+
+    .mini-pill {
+      color: #173f33;
+      background: #e3f6ec;
+    }
+
+    .tool-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .icon-button,
+    .primary-button,
+    .ghost-button,
+    .preset-button,
+    .quiz-option {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      border-radius: var(--radius);
+      font-weight: 900;
+      letter-spacing: 0;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .icon-button,
+    .ghost-button,
+    .preset-button,
+    .quiz-option {
+      border: 1px solid rgba(35, 48, 56, 0.12);
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .icon-button {
+      width: 42px;
+      padding: 0;
+    }
+
+    .primary-button {
+      min-width: 118px;
+      padding: 0 16px;
+      color: #fff;
+      background: var(--green);
+      box-shadow: 0 10px 24px rgba(47, 155, 103, 0.24);
+    }
+
+    .ghost-button {
+      min-width: 96px;
+      padding: 0 12px;
+    }
+
+    .icon-button:hover,
+    .primary-button:hover,
+    .ghost-button:hover,
+    .preset-button:hover,
+    .quiz-option:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(35, 48, 56, 0.12);
+    }
+
+    .icon-button:focus-visible,
+    .primary-button:focus-visible,
+    .ghost-button:focus-visible,
+    .preset-button:focus-visible,
+    .quiz-option:focus-visible,
+    .organism-card:focus-visible,
+    .chain-slot:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(47, 155, 103, 0.28);
+      outline-offset: 2px;
+    }
+
+    .chain-stage {
+      min-height: 520px;
+      padding: 18px;
+      background:
+        linear-gradient(90deg, rgba(35, 48, 56, 0.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(35, 48, 56, 0.045) 1px, transparent 1px),
+        linear-gradient(180deg, #f8fdf9 0%, #fff7eb 100%);
+      background-size: 38px 38px, 38px 38px, auto;
+    }
+
+    .ecosystem-banner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid rgba(35, 48, 56, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.78);
+      margin-bottom: 14px;
+    }
+
+    .ecosystem-banner strong {
+      display: block;
+      font-size: 1.12rem;
+    }
+
+    .ecosystem-banner span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .energy-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 94px;
+      min-height: 42px;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      color: #604000;
+      background: #fff1c7;
+      border: 1px solid rgba(242, 184, 75, 0.54);
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .chain-board {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(118px, 1fr));
+      gap: 10px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .chain-slot {
+      position: relative;
+      min-height: 176px;
+      padding: 11px;
+      border: 2px dashed rgba(22, 133, 150, 0.28);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.74);
+      transition: border 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .chain-slot.is-target {
+      border-color: rgba(228, 124, 63, 0.76);
+      background: #fff5ee;
+      animation: targetPulse 1s ease-in-out infinite alternate;
+    }
+
+    .chain-slot.is-correct {
+      border-color: rgba(47, 155, 103, 0.7);
+      background: #effaf4;
+    }
+
+    .chain-slot.is-wrong {
+      border-color: rgba(217, 90, 79, 0.72);
+      background: #ffece9;
+    }
+
+    .slot-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 48px;
+    }
+
+    .slot-role {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .slot-label {
+      display: block;
+      margin-top: 3px;
+      font-size: 0.92rem;
+      font-weight: 950;
+      line-height: 1.2;
+    }
+
+    .slot-energy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 26px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      color: #604000;
+      background: #fff0c7;
+      font-size: 0.76rem;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .slot-empty {
+      display: grid;
+      place-items: center;
+      min-height: 86px;
+      margin-top: 12px;
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(35, 48, 56, 0.08);
+      text-align: center;
+      font-weight: 850;
+      line-height: 1.3;
+      padding: 10px;
+    }
+
+    .arrow-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: -8px 8% 16px;
+      color: var(--teal);
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .arrow-row span {
+      display: block;
+      min-height: 22px;
+      line-height: 22px;
+      border-radius: 999px;
+      background: rgba(22, 133, 150, 0.1);
+    }
+
+    .organism-palette {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(110px, 1fr));
+      gap: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(35, 48, 56, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .organism-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+      min-height: 82px;
+      padding: 10px;
+      border: 1px solid rgba(35, 48, 56, 0.11);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      user-select: none;
+      touch-action: none;
+      box-shadow: 0 8px 18px rgba(35, 48, 56, 0.08);
+    }
+
+    .organism-card.is-selected {
+      border-color: rgba(47, 155, 103, 0.62);
+      box-shadow: 0 0 0 4px rgba(47, 155, 103, 0.16);
+    }
+
+    .organism-card.is-used {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .organism-card.is-dragging {
+      opacity: 0.25;
+    }
+
+    .organism-card.in-slot {
+      width: 100%;
+      min-height: 90px;
+      margin-top: 12px;
+      box-shadow: 0 12px 24px rgba(35, 48, 56, 0.12);
+    }
+
+    .organism-icon {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--green);
+      font-size: 0.72rem;
+      font-weight: 950;
+      letter-spacing: 0;
+      overflow: hidden;
+    }
+
+    .organism-icon::before,
+    .organism-icon::after {
+      content: "";
+      position: absolute;
+      opacity: 0.78;
+    }
+
+    .organism-icon.sun {
+      color: #604000;
+      background: #ffd36a;
+      box-shadow: inset 0 0 0 8px rgba(255, 246, 190, 0.45);
+    }
+
+    .organism-icon.sun::before {
+      width: 60px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.56);
+      transform: rotate(35deg);
+    }
+
+    .organism-icon.plant {
+      background: #44a96d;
+    }
+
+    .organism-icon.plant::before {
+      width: 20px;
+      height: 30px;
+      border-radius: 18px 18px 4px 18px;
+      background: rgba(255, 255, 255, 0.34);
+      transform: rotate(-28deg);
+    }
+
+    .organism-icon.insect {
+      background: #8aaf3f;
+    }
+
+    .organism-icon.insect::before {
+      width: 28px;
+      height: 16px;
+      border-radius: 999px;
+      border: 3px solid rgba(255, 255, 255, 0.52);
+    }
+
+    .organism-icon.small {
+      background: #2a94a6;
+    }
+
+    .organism-icon.small::before {
+      width: 28px;
+      height: 16px;
+      border-radius: 50% 8px 8px 50%;
+      background: rgba(255, 255, 255, 0.34);
+    }
+
+    .organism-icon.predator {
+      background: #d86f3a;
+    }
+
+    .organism-icon.predator::before {
+      width: 30px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.5);
+      transform: rotate(-25deg);
+    }
+
+    .organism-text strong {
+      display: block;
+      font-size: 0.92rem;
+      line-height: 1.15;
+    }
+
+    .organism-text span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .drag-ghost {
+      position: fixed;
+      z-index: 1000;
+      width: 190px;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      opacity: 0.96;
+    }
+
+    .readout-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .readout {
+      min-width: 0;
+      padding: 14px;
+      border-right: 1px solid var(--line);
+    }
+
+    .readout:last-child {
+      border-right: 0;
+    }
+
+    .readout span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .readout strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 1.04rem;
+      line-height: 1.25;
+    }
+
+    .side-panel {
+      padding: 16px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      font-size: 1.08rem;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .toggle-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(35, 48, 56, 0.09);
+      border-radius: var(--radius);
+      background: #fbfdfb;
+    }
+
+    .toggle-top {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 850;
+    }
+
+    .toggle-row input {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--green);
+    }
+
+    .button-grid,
+    .ecosystem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .ecosystem-grid {
+      grid-template-columns: 1fr;
+      margin-bottom: 16px;
+    }
+
+    .preset-button {
+      min-width: 0;
+      padding: 0 10px;
+      font-size: 0.88rem;
+    }
+
+    .preset-button.is-active {
+      color: #fff;
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+
+    .role-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .role-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid rgba(35, 48, 56, 0.09);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .role-row.is-active {
+      border-color: rgba(47, 155, 103, 0.38);
+      background: #effaf4;
+      box-shadow: inset 4px 0 0 var(--green);
+    }
+
+    .role-dot {
+      width: 13px;
+      height: 13px;
+      margin-top: 4px;
+      border-radius: 999px;
+      background: var(--gold);
+    }
+
+    .role-row[data-level="producer"] .role-dot {
+      background: var(--green);
+    }
+
+    .role-row[data-level="primary"] .role-dot {
+      background: #8aaf3f;
+    }
+
+    .role-row[data-level="secondary"] .role-dot {
+      background: var(--teal);
+    }
+
+    .role-row[data-level="top"] .role-dot {
+      background: var(--orange);
+    }
+
+    .role-row strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 0.94rem;
+    }
+
+    .role-row span span {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.34;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .info-panel {
+      padding: 16px;
+      min-height: 172px;
+    }
+
+    .info-panel h2 {
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+    }
+
+    .observation {
+      min-height: 58px;
+      color: var(--ink);
+      font-weight: 780;
+      line-height: 1.48;
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quiz-option {
+      min-height: 44px;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .quiz-option.is-right {
+      border-color: rgba(47, 155, 103, 0.55);
+      color: #17623b;
+      background: #def7e8;
+    }
+
+    .quiz-option.is-wrong {
+      border-color: rgba(217, 90, 79, 0.45);
+      color: #8d2f29;
+      background: #ffe6e3;
+    }
+
+    .quiz-feedback {
+      min-height: 26px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 9px;
+      height: 15px;
+      border-radius: 2px;
+      animation: confettiFall 900ms ease-out forwards;
+    }
+
+    @keyframes targetPulse {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(-2px);
+      }
+    }
+
+    @keyframes confettiFall {
+      from {
+        transform: translateY(-20vh) rotate(0deg);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(110vh) rotate(240deg);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .chain-board,
+      .organism-palette {
+        grid-template-columns: repeat(3, minmax(130px, 1fr));
+      }
+
+      .arrow-row {
+        display: none;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .layout,
+      .hero,
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-card {
+        width: 100%;
+      }
+
+      .readout-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .readout:nth-child(2) {
+        border-right: 0;
+      }
+
+      .readout:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 12vw, 3rem);
+      }
+
+      .tool-buttons,
+      .challenge {
+        display: grid;
+        width: 100%;
+      }
+
+      .button-grid,
+      .quiz-options,
+      .chain-board,
+      .organism-palette {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .icon-button,
+      .primary-button,
+      .ghost-button {
+        width: 100%;
+      }
+
+      .ecosystem-banner {
+        grid-template-columns: 1fr;
+      }
+
+      .chain-stage {
+        min-height: 420px;
+        padding: 12px;
+      }
+
+      .chain-slot {
+        min-height: 148px;
+      }
+
+      .organism-card {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        min-height: 104px;
+        text-align: center;
+      }
+
+      .readout-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .readout,
+      .readout:nth-child(2) {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .readout:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <div class="eyebrow" aria-label="Activity details">
+          <span class="tag">NCERT Classes 4-6</span>
+          <span class="tag">Science</span>
+          <span class="tag">Easy</span>
+          <span class="tag">Food Chain</span>
+        </div>
+        <h1>Food Chain Builder</h1>
+        <p class="subtitle">Drag organisms into the correct order to show how energy flows from sunlight to plants and then to animals.</p>
+      </div>
+      <aside class="score-card" aria-live="polite">
+        <div class="score-label">Explorer XP</div>
+        <div class="score-value"><span id="xpValue">0</span> XP</div>
+      </aside>
+    </header>
+
+    <section class="layout" aria-label="Food chain workspace">
+      <article class="lab-card">
+        <div class="lab-toolbar">
+          <div class="challenge">
+            <span>Challenge</span>
+            <span class="target-pill">Place: <span id="targetValue">Energy source</span></span>
+            <span class="status-pill" id="statusPill">Ready</span>
+          </div>
+          <div class="tool-buttons">
+            <button type="button" class="icon-button" id="shuffleButton" title="Shuffle organisms" aria-label="Shuffle organisms">Mix</button>
+            <button type="button" class="ghost-button" id="checkButton">Check</button>
+          </div>
+        </div>
+
+        <div class="chain-stage">
+          <div class="ecosystem-banner">
+            <div>
+              <strong id="ecosystemName">Grassland chain</strong>
+              <span id="ecosystemFact">A simple chain begins when green plants trap sunlight to make food.</span>
+            </div>
+            <div class="energy-badge" id="energyBadge">Energy flows -&gt;</div>
+          </div>
+
+          <div class="organism-palette" id="organismPalette" aria-label="Organism cards"></div>
+          <div class="chain-board" id="chainBoard" aria-label="Food chain slots"></div>
+          <div class="arrow-row" aria-hidden="true">
+            <span>-&gt;</span>
+            <span>-&gt;</span>
+            <span>-&gt;</span>
+            <span>-&gt;</span>
+          </div>
+        </div>
+
+        <div class="readout-strip" aria-live="polite">
+          <div class="readout">
+            <span>Correct Slots</span>
+            <strong id="correctReadout">0 of 5</strong>
+          </div>
+          <div class="readout">
+            <span>Next Role</span>
+            <strong id="nextRoleReadout">Energy source</strong>
+          </div>
+          <div class="readout">
+            <span>Energy Rule</span>
+            <strong id="energyReadout">Producer starts food</strong>
+          </div>
+          <div class="readout">
+            <span>Selected</span>
+            <strong id="selectedReadout">None</strong>
+          </div>
+        </div>
+      </article>
+
+      <aside class="side-panel">
+        <div class="section-title">
+          <h2>Choose Ecosystem</h2>
+          <span class="mini-pill" id="levelPill">5 links</span>
+        </div>
+
+        <div class="ecosystem-grid" id="ecosystemGrid">
+          <button type="button" class="preset-button is-active" data-ecosystem="grassland">Grassland</button>
+          <button type="button" class="preset-button" data-ecosystem="pond">Pond</button>
+          <button type="button" class="preset-button" data-ecosystem="forest">Forest</button>
+        </div>
+
+        <div class="control-group">
+          <label class="toggle-row" for="energyToggle">
+            <span class="toggle-top">Show energy numbers</span>
+            <input id="energyToggle" type="checkbox" checked>
+          </label>
+
+          <div class="button-grid">
+            <button type="button" class="primary-button" id="resetButton">Reset</button>
+            <button type="button" class="ghost-button" id="hintButton">Hint</button>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h2>Roles</h2>
+        </div>
+        <div class="role-list" id="roleList" aria-label="Food chain roles">
+          <div class="role-row" data-level="source">
+            <span class="role-dot"></span>
+            <span><strong>Energy source</strong><span>Sunlight gives energy to producers.</span></span>
+          </div>
+          <div class="role-row" data-level="producer">
+            <span class="role-dot"></span>
+            <span><strong>Producer</strong><span>Green plants make their own food.</span></span>
+          </div>
+          <div class="role-row" data-level="primary">
+            <span class="role-dot"></span>
+            <span><strong>Primary consumer</strong><span>Herbivores eat plants or algae.</span></span>
+          </div>
+          <div class="role-row" data-level="secondary">
+            <span class="role-dot"></span>
+            <span><strong>Secondary consumer</strong><span>Animals eat primary consumers.</span></span>
+          </div>
+          <div class="role-row" data-level="top">
+            <span class="role-dot"></span>
+            <span><strong>Top consumer</strong><span>Predators are near the end of the chain.</span></span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="info-grid">
+      <article class="info-panel">
+        <div class="section-title">
+          <h2>Observation</h2>
+          <button type="button" class="ghost-button" id="solveButton">Show Order</button>
+        </div>
+        <p class="observation" id="observationLine">Start with sunlight, then place the producer, herbivore, and predators in order.</p>
+        <p class="hint" id="hintLine">Tip: arrows in a food chain show the direction of energy flow.</p>
+      </article>
+
+      <article class="info-panel">
+        <h2>Quick Check</h2>
+        <p class="hint">Who makes food using sunlight?</p>
+        <div class="quiz-options" id="quizOptions"></div>
+        <p class="quiz-feedback" id="quizFeedback" aria-live="polite"></p>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const levels = [
+      { key: "source", role: "Energy source", label: "Sunlight", energy: "100%" },
+      { key: "producer", role: "Producer", label: "Makes food", energy: "10%" },
+      { key: "primary", role: "Primary consumer", label: "Eats producer", energy: "1%" },
+      { key: "secondary", role: "Secondary consumer", label: "Eats herbivore", energy: "0.1%" },
+      { key: "top", role: "Top consumer", label: "Predator", energy: "0.01%" }
+    ];
+
+    const ecosystems = {
+      grassland: {
+        name: "Grassland chain",
+        fact: "A simple chain begins when green plants trap sunlight to make food.",
+        chain: [
+          { id: "sun", name: "Sunlight", type: "sun", level: "source", note: "Energy source" },
+          { id: "grass", name: "Grass", type: "plant", level: "producer", note: "Producer" },
+          { id: "grasshopper", name: "Grasshopper", type: "insect", level: "primary", note: "Primary consumer" },
+          { id: "frog", name: "Frog", type: "small", level: "secondary", note: "Secondary consumer" },
+          { id: "snake", name: "Snake", type: "predator", level: "top", note: "Top consumer" }
+        ]
+      },
+      pond: {
+        name: "Pond chain",
+        fact: "In water, tiny green plants such as algae can begin the food chain.",
+        chain: [
+          { id: "pondSun", name: "Sunlight", type: "sun", level: "source", note: "Energy source" },
+          { id: "algae", name: "Algae", type: "plant", level: "producer", note: "Producer" },
+          { id: "waterInsect", name: "Water insect", type: "insect", level: "primary", note: "Primary consumer" },
+          { id: "smallFish", name: "Small fish", type: "small", level: "secondary", note: "Secondary consumer" },
+          { id: "heron", name: "Heron", type: "predator", level: "top", note: "Top consumer" }
+        ]
+      },
+      forest: {
+        name: "Forest chain",
+        fact: "Forest chains often begin with leaves made by green plants.",
+        chain: [
+          { id: "forestSun", name: "Sunlight", type: "sun", level: "source", note: "Energy source" },
+          { id: "leaves", name: "Leaves", type: "plant", level: "producer", note: "Producer" },
+          { id: "caterpillar", name: "Caterpillar", type: "insect", level: "primary", note: "Primary consumer" },
+          { id: "bird", name: "Bird", type: "small", level: "secondary", note: "Secondary consumer" },
+          { id: "hawk", name: "Hawk", type: "predator", level: "top", note: "Top consumer" }
+        ]
+      }
+    };
+
+    const state = {
+      ecosystem: "grassland",
+      slots: [null, null, null, null, null],
+      order: [2, 4, 1, 3, 0],
+      selected: null,
+      dragging: null,
+      showEnergy: true,
+      checked: false,
+      notice: "",
+      xp: 0
+    };
+
+    const els = {
+      ecosystemName: document.getElementById("ecosystemName"),
+      ecosystemFact: document.getElementById("ecosystemFact"),
+      energyBadge: document.getElementById("energyBadge"),
+      chainBoard: document.getElementById("chainBoard"),
+      organismPalette: document.getElementById("organismPalette"),
+      targetValue: document.getElementById("targetValue"),
+      statusPill: document.getElementById("statusPill"),
+      correctReadout: document.getElementById("correctReadout"),
+      nextRoleReadout: document.getElementById("nextRoleReadout"),
+      energyReadout: document.getElementById("energyReadout"),
+      selectedReadout: document.getElementById("selectedReadout"),
+      energyToggle: document.getElementById("energyToggle"),
+      roleList: document.getElementById("roleList"),
+      ecosystemGrid: document.getElementById("ecosystemGrid"),
+      levelPill: document.getElementById("levelPill"),
+      observationLine: document.getElementById("observationLine"),
+      hintLine: document.getElementById("hintLine"),
+      quizOptions: document.getElementById("quizOptions"),
+      quizFeedback: document.getElementById("quizFeedback"),
+      xpValue: document.getElementById("xpValue"),
+      confettiLayer: document.getElementById("confettiLayer")
+    };
+
+    function currentChain() {
+      return ecosystems[state.ecosystem].chain;
+    }
+
+    function organismById(id) {
+      return currentChain().find(function(item) {
+        return item.id === id;
+      });
+    }
+
+    function correctIdAt(index) {
+      return currentChain()[index].id;
+    }
+
+    function firstEmptyIndex() {
+      return state.slots.findIndex(function(item) {
+        return item === null;
+      });
+    }
+
+    function correctCount() {
+      return state.slots.reduce(function(total, id, index) {
+        return total + (id === correctIdAt(index) ? 1 : 0);
+      }, 0);
+    }
+
+    function completeAndCorrect() {
+      return correctCount() === levels.length && state.slots.every(Boolean);
+    }
+
+    function shuffledOrganisms() {
+      const chain = currentChain();
+      return state.order.map(function(index) {
+        return chain[index];
+      });
+    }
+
+    function escapeText(text) {
+      return String(text).replace(/[&<>"']/g, function(char) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        }[char];
+      });
+    }
+
+    function renderOrganismCard(organism, options) {
+      const settings = options || {};
+      const classes = ["organism-card"];
+      if (settings.inSlot) {
+        classes.push("in-slot");
+      }
+      if (settings.used) {
+        classes.push("is-used");
+      }
+      if (state.selected === organism.id && !settings.used) {
+        classes.push("is-selected");
+      }
+      if (state.dragging && state.dragging.id === organism.id && settings.source === state.dragging.source) {
+        classes.push("is-dragging");
+      }
+      const source = settings.source || "palette";
+      return [
+        '<button type="button" class="' + classes.join(" ") + '" data-organism="' + organism.id + '" data-source="' + source + '">',
+        '<span class="organism-icon ' + organism.type + '">' + escapeText(shortLabel(organism)) + '</span>',
+        '<span class="organism-text"><strong>' + escapeText(organism.name) + '</strong><span>' + escapeText(organism.note) + '</span></span>',
+        '</button>'
+      ].join("");
+    }
+
+    function shortLabel(organism) {
+      if (organism.type === "sun") {
+        return "SUN";
+      }
+      if (organism.type === "plant") {
+        return "PLT";
+      }
+      if (organism.type === "insect") {
+        return "BUG";
+      }
+      if (organism.type === "small") {
+        return "PREY";
+      }
+      return "TOP";
+    }
+
+    function renderBoard() {
+      els.chainBoard.innerHTML = levels.map(function(level, index) {
+        const placedId = state.slots[index];
+        const placed = placedId ? organismById(placedId) : null;
+        const classes = ["chain-slot"];
+        const targetIndex = firstEmptyIndex();
+        if (targetIndex === index) {
+          classes.push("is-target");
+        }
+        if (state.checked && placedId) {
+          classes.push(placedId === correctIdAt(index) ? "is-correct" : "is-wrong");
+        }
+        return [
+          '<div class="' + classes.join(" ") + '" data-slot-index="' + index + '" tabindex="0">',
+          '<div class="slot-top">',
+          '<span><span class="slot-role">' + escapeText(level.role) + '</span><span class="slot-label">' + escapeText(level.label) + '</span></span>',
+          state.showEnergy ? '<span class="slot-energy">' + escapeText(level.energy) + '</span>' : '',
+          '</div>',
+          placed ? renderOrganismCard(placed, { inSlot: true, source: "slot" }) : '<div class="slot-empty">Drop organism here</div>',
+          '</div>'
+        ].join("");
+      }).join("");
+    }
+
+    function renderPalette() {
+      const used = new Set(state.slots.filter(Boolean));
+      els.organismPalette.innerHTML = shuffledOrganisms().map(function(organism) {
+        return renderOrganismCard(organism, {
+          used: used.has(organism.id),
+          source: "palette"
+        });
+      }).join("");
+    }
+
+    function updateText() {
+      const ecosystem = ecosystems[state.ecosystem];
+      const nextIndex = firstEmptyIndex();
+      const count = correctCount();
+      const status = completeAndCorrect()
+        ? "Chain complete"
+        : state.notice
+          ? state.notice
+          : "Ready";
+      els.ecosystemName.textContent = ecosystem.name;
+      els.ecosystemFact.textContent = ecosystem.fact;
+      els.energyBadge.textContent = state.showEnergy ? "Energy flows ->" : "Order matters";
+      els.targetValue.textContent = nextIndex === -1 ? "Check chain" : levels[nextIndex].role;
+      els.statusPill.textContent = status;
+      els.statusPill.classList.toggle("is-matched", completeAndCorrect() || status === "Placed");
+      els.correctReadout.textContent = count + " of " + levels.length;
+      els.nextRoleReadout.textContent = nextIndex === -1 ? "Ready to check" : levels[nextIndex].role;
+      els.energyReadout.textContent = energyRuleText();
+      els.selectedReadout.textContent = state.selected ? organismById(state.selected).name : "None";
+      els.energyToggle.checked = state.showEnergy;
+      els.levelPill.textContent = levels.length + " links";
+      els.xpValue.textContent = state.xp;
+      els.observationLine.textContent = observationText();
+      els.hintLine.textContent = hintText();
+      updateRoleList(nextIndex);
+      updateEcosystemButtons();
+    }
+
+    function energyRuleText() {
+      const count = correctCount();
+      if (completeAndCorrect()) {
+        return "Energy path is correct";
+      }
+      if (count >= 3) {
+        return "Predators come later";
+      }
+      return "Producer starts food";
+    }
+
+    function observationText() {
+      if (completeAndCorrect()) {
+        return "Correct. The chain shows energy moving from sunlight to producer, then through consumers.";
+      }
+      if (state.notice === "Placed") {
+        return "Good placement. Continue filling the chain from left to right.";
+      }
+      if (state.notice === "Try again") {
+        return "Some organisms are out of order. A food chain starts with sunlight and a producer before consumers.";
+      }
+      const nextIndex = firstEmptyIndex();
+      if (nextIndex === -1) {
+        return "All slots are filled. Press Check to test the chain.";
+      }
+      return "Place the " + levels[nextIndex].role.toLowerCase() + " in the highlighted slot.";
+    }
+
+    function hintText() {
+      const nextIndex = firstEmptyIndex();
+      if (nextIndex === -1) {
+        return "Tip: read the arrows as 'is eaten by' or 'gives energy to'.";
+      }
+      const correct = currentChain()[nextIndex];
+      return "Tip: the next correct card is " + correct.name + ".";
+    }
+
+    function updateRoleList(nextIndex) {
+      els.roleList.querySelectorAll(".role-row").forEach(function(row) {
+        row.classList.toggle("is-active", nextIndex !== -1 && row.dataset.level === levels[nextIndex].key);
+      });
+    }
+
+    function updateEcosystemButtons() {
+      els.ecosystemGrid.querySelectorAll("[data-ecosystem]").forEach(function(button) {
+        button.classList.toggle("is-active", button.dataset.ecosystem === state.ecosystem);
+      });
+    }
+
+    function render() {
+      renderBoard();
+      renderPalette();
+      updateText();
+    }
+
+    function removeFromSlots(id) {
+      state.slots = state.slots.map(function(slotId) {
+        return slotId === id ? null : slotId;
+      });
+    }
+
+    function placeOrganism(id, slotIndex) {
+      removeFromSlots(id);
+      state.slots[slotIndex] = id;
+      state.selected = null;
+      state.checked = false;
+      state.notice = "Placed";
+      render();
+    }
+
+    function shuffleOrder() {
+      const length = state.order.length;
+      state.order = state.order.map(function(_, index) {
+        return (index * 2 + 1) % length;
+      });
+      state.notice = "Mixed";
+      render();
+    }
+
+    function resetChain(keepXp) {
+      state.slots = [null, null, null, null, null];
+      state.selected = null;
+      state.dragging = null;
+      state.checked = false;
+      state.notice = "";
+      if (!keepXp) {
+        state.xp = 0;
+      }
+      renderQuiz();
+      render();
+    }
+
+    function setEcosystem(name) {
+      state.ecosystem = name;
+      state.order = [2, 4, 1, 3, 0];
+      resetChain(true);
+    }
+
+    function showOrder() {
+      state.slots = currentChain().map(function(item) {
+        return item.id;
+      });
+      state.selected = null;
+      state.checked = true;
+      state.notice = "";
+      render();
+    }
+
+    function checkChain() {
+      state.checked = true;
+      state.selected = null;
+      if (completeAndCorrect()) {
+        state.notice = "";
+        if (state.xp < 50) {
+          state.xp += 10;
+        }
+        burstConfetti();
+      } else {
+        state.notice = "Try again";
+      }
+      render();
+    }
+
+    function cardFromEvent(event) {
+      return event.target.closest("[data-organism]");
+    }
+
+    function startDrag(event) {
+      const card = cardFromEvent(event);
+      if (!card) {
+        return;
+      }
+      const id = card.dataset.organism;
+      const source = card.dataset.source || "palette";
+      if (source === "palette" && state.slots.includes(id)) {
+        return;
+      }
+      event.preventDefault();
+      state.dragging = {
+        id: id,
+        source: source,
+        startX: event.clientX,
+        startY: event.clientY,
+        moved: false
+      };
+      card.setPointerCapture(event.pointerId);
+      createGhost(card, event.clientX, event.clientY);
+      document.addEventListener("pointermove", moveDrag);
+      document.addEventListener("pointerup", endDrag, { once: true });
+    }
+
+    function createGhost(card, x, y) {
+      clearGhost();
+      const ghost = card.cloneNode(true);
+      ghost.classList.remove("is-used", "is-selected", "is-dragging");
+      ghost.classList.add("drag-ghost");
+      ghost.removeAttribute("tabindex");
+      ghost.style.left = x + "px";
+      ghost.style.top = y + "px";
+      document.body.appendChild(ghost);
+    }
+
+    function clearGhost() {
+      document.querySelectorAll(".drag-ghost").forEach(function(node) {
+        node.remove();
+      });
+    }
+
+    function moveGhost(x, y) {
+      const ghost = document.querySelector(".drag-ghost");
+      if (ghost) {
+        ghost.style.left = x + "px";
+        ghost.style.top = y + "px";
+      }
+    }
+
+    function moveDrag(event) {
+      if (!state.dragging) {
+        return;
+      }
+      const dx = Math.abs(event.clientX - state.dragging.startX);
+      const dy = Math.abs(event.clientY - state.dragging.startY);
+      if (dx + dy > 8) {
+        state.dragging.moved = true;
+      }
+      moveGhost(event.clientX, event.clientY);
+    }
+
+    function endDrag(event) {
+      document.removeEventListener("pointermove", moveDrag);
+      if (!state.dragging) {
+        return;
+      }
+      const drag = state.dragging;
+      clearGhost();
+      state.dragging = null;
+      const slot = document.elementsFromPoint(event.clientX, event.clientY).map(function(node) {
+        return node.closest ? node.closest(".chain-slot") : null;
+      }).find(Boolean);
+      if (drag.moved && slot) {
+        placeOrganism(drag.id, Number(slot.dataset.slotIndex));
+        return;
+      }
+      state.selected = state.selected === drag.id ? null : drag.id;
+      state.notice = state.selected ? "Selected" : "";
+      render();
+    }
+
+    function handleBoardClick(event) {
+      const slot = event.target.closest(".chain-slot");
+      if (slot && state.selected) {
+        placeOrganism(state.selected, Number(slot.dataset.slotIndex));
+      }
+    }
+
+    function burstConfetti() {
+      const colors = ["#2f9b67", "#f2b84b", "#d95a4f", "#168596", "#e47c3f"];
+      els.confettiLayer.innerHTML = "";
+      for (let i = 0; i < 26; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.top = -10 - Math.random() * 20 + "vh";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 220 + "ms";
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(function() {
+        els.confettiLayer.innerHTML = "";
+      }, 1200);
+    }
+
+    function renderQuiz() {
+      const options = [
+        { label: "Producer", right: true },
+        { label: "Top consumer", right: false },
+        { label: "Decomposer", right: false },
+        { label: "Primary consumer", right: false }
+      ];
+      els.quizOptions.innerHTML = "";
+      els.quizFeedback.textContent = "";
+      options.forEach(function(option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "quiz-option";
+        button.textContent = option.label;
+        button.addEventListener("click", function() {
+          answerQuiz(option, button);
+        });
+        els.quizOptions.appendChild(button);
+      });
+    }
+
+    function answerQuiz(option, button) {
+      els.quizOptions.querySelectorAll(".quiz-option").forEach(function(item) {
+        item.classList.remove("is-right", "is-wrong");
+      });
+      button.classList.add(option.right ? "is-right" : "is-wrong");
+      els.quizFeedback.textContent = option.right
+        ? "Correct. Producers, such as green plants or algae, make food using sunlight."
+        : "Almost. Producers make food using sunlight and begin the living part of a food chain.";
+    }
+
+    document.addEventListener("pointerdown", startDrag);
+    els.chainBoard.addEventListener("click", handleBoardClick);
+
+    document.getElementById("shuffleButton").addEventListener("click", shuffleOrder);
+    document.getElementById("checkButton").addEventListener("click", checkChain);
+    document.getElementById("resetButton").addEventListener("click", function() {
+      resetChain(false);
+    });
+    document.getElementById("hintButton").addEventListener("click", function() {
+      state.notice = "Hint";
+      els.observationLine.textContent = hintText();
+    });
+    document.getElementById("solveButton").addEventListener("click", showOrder);
+
+    els.energyToggle.addEventListener("change", function(event) {
+      state.showEnergy = event.target.checked;
+      render();
+    });
+
+    els.ecosystemGrid.querySelectorAll("[data-ecosystem]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setEcosystem(button.dataset.ecosystem);
+      });
+    });
+
+    renderQuiz();
+    render();
+  </script>
+</body>
+</html>

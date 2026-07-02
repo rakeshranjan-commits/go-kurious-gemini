@@ -1,0 +1,1543 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reflection in Mirrors Lab: Image Formation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-soft: #f9fbfb;
+      --ink: #1f272c;
+      --muted: #607079;
+      --line: #d5dde0;
+      --blue: #2368a2;
+      --blue-dark: #174d78;
+      --cyan: #2d91a4;
+      --cyan-dark: #176b7a;
+      --gold: #d89425;
+      --amber: #efb44f;
+      --coral: #cc5b4a;
+      --violet: #6b5bb3;
+      --mirror: #8bb9c8;
+      --mirror-dark: #3c7182;
+      --ray: #d47c21;
+      --dash: #6b5bb3;
+      --focus: #1f64d8;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(217, 237, 244, 0.76), rgba(244, 247, 248, 0.94) 44%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      padding: clamp(16px, 3vw, 28px) clamp(16px, 4vw, 44px) 10px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(213, 221, 224, 0.78);
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .kicker {
+      margin: 0 0 5px;
+      color: var(--blue-dark);
+      font-size: 0.78rem;
+      font-weight: 780;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 3.5vw, 2.75rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: clamp(1.05rem, 2.5vw, 1.45rem);
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    .scorebar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.76);
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(216, 148, 37, 0.16);
+    }
+
+    main {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      padding: clamp(16px, 3vw, 30px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 370px);
+      gap: clamp(18px, 3vw, 28px);
+      align-items: stretch;
+    }
+
+    .stage-shell,
+    .control-panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 46px rgba(31, 39, 44, 0.08);
+      min-width: 0;
+    }
+
+    .stage-shell {
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .challenge-bar {
+      padding: clamp(16px, 2.4vw, 22px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f9fbfb);
+    }
+
+    .challenge-copy {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .prompt {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .target-card {
+      min-width: 128px;
+      display: grid;
+      gap: 3px;
+      justify-items: center;
+      padding: 11px 14px;
+      border: 1px solid rgba(35, 104, 162, 0.28);
+      border-radius: 8px;
+      background: #edf6fb;
+      color: var(--blue-dark);
+      font-weight: 820;
+    }
+
+    .target-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 780;
+      text-transform: uppercase;
+    }
+
+    .target-value {
+      font-size: clamp(1.1rem, 3vw, 1.42rem);
+      line-height: 1;
+    }
+
+    .workbench {
+      min-height: 540px;
+      padding: clamp(16px, 2.5vw, 24px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
+      gap: clamp(16px, 2.6vw, 24px);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(239, 180, 79, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(244, 247, 248, 0.62));
+    }
+
+    .mirror-zone {
+      position: relative;
+      min-height: 450px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 12px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(249, 251, 251, 0.92)),
+        var(--surface-soft);
+      overflow: hidden;
+    }
+
+    .scene-frame {
+      width: min(100%, 650px);
+      aspect-ratio: 1.34;
+      display: grid;
+      place-items: center;
+      padding: clamp(8px, 2vw, 16px);
+    }
+
+    .mirror-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+      touch-action: none;
+    }
+
+    .room-bg {
+      fill: #edf4f6;
+    }
+
+    .floor {
+      fill: #e5edf0;
+      stroke: rgba(96, 112, 121, 0.22);
+      stroke-width: 1;
+    }
+
+    .grid-line {
+      stroke: rgba(96, 112, 121, 0.16);
+      stroke-width: 1;
+    }
+
+    .mirror-body {
+      fill: url(#mirrorFill);
+      stroke: var(--mirror-dark);
+      stroke-width: 3;
+      filter: drop-shadow(0 12px 12px rgba(31, 39, 44, 0.16));
+      cursor: grab;
+    }
+
+    .mirror-body:active {
+      cursor: grabbing;
+    }
+
+    .mirror-back {
+      stroke: rgba(60, 113, 130, 0.36);
+      stroke-width: 10;
+      stroke-linecap: round;
+    }
+
+    .object-body {
+      filter: drop-shadow(0 10px 10px rgba(31, 39, 44, 0.16));
+      cursor: grab;
+    }
+
+    .object-body:active {
+      cursor: grabbing;
+    }
+
+    .image-body {
+      opacity: 0.46;
+      stroke-dasharray: 7 6;
+      filter: drop-shadow(0 8px 8px rgba(107, 91, 179, 0.14));
+    }
+
+    .object-stem {
+      fill: #f4c05d;
+      stroke: #8d561b;
+      stroke-width: 2;
+    }
+
+    .object-flame {
+      fill: #e96f3c;
+      stroke: #a84327;
+      stroke-width: 2;
+    }
+
+    .object-base {
+      fill: #2368a2;
+      stroke: #174d78;
+      stroke-width: 2;
+    }
+
+    .image-stem {
+      fill: #d7d1f3;
+      stroke: var(--dash);
+      stroke-width: 2;
+    }
+
+    .image-flame {
+      fill: #efd3ce;
+      stroke: var(--dash);
+      stroke-width: 2;
+    }
+
+    .image-base {
+      fill: #d7e6f1;
+      stroke: var(--dash);
+      stroke-width: 2;
+    }
+
+    .lr-tag {
+      fill: #ffffff;
+      stroke: rgba(31, 39, 44, 0.22);
+      stroke-width: 1;
+    }
+
+    .lr-text {
+      fill: var(--ink);
+      font-size: 12px;
+      font-weight: 840;
+    }
+
+    .image-text {
+      fill: var(--dash);
+    }
+
+    .ray {
+      fill: none;
+      stroke: var(--ray);
+      stroke-width: 3.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .ray.reflected {
+      stroke: #e3a13c;
+    }
+
+    .ray.extension {
+      stroke: var(--dash);
+      stroke-dasharray: 8 8;
+      opacity: 0.84;
+    }
+
+    .ray.dimmed {
+      opacity: 0.15;
+    }
+
+    .normal-line {
+      stroke: rgba(96, 112, 121, 0.42);
+      stroke-width: 2;
+      stroke-dasharray: 5 7;
+      stroke-linecap: round;
+    }
+
+    .measure-line {
+      stroke: var(--cyan);
+      stroke-width: 3;
+      stroke-linecap: round;
+      marker-start: url(#arrowStart);
+      marker-end: url(#arrowEnd);
+    }
+
+    .measure-label-bg {
+      fill: rgba(255, 255, 255, 0.92);
+      stroke: rgba(213, 221, 224, 0.95);
+      stroke-width: 1;
+    }
+
+    .svg-label {
+      fill: var(--ink);
+      font-size: 14px;
+      font-weight: 780;
+    }
+
+    .svg-small {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .eye-skin {
+      fill: #a66c4a;
+    }
+
+    .eye-shirt {
+      fill: var(--cyan);
+    }
+
+    .drag-hit {
+      fill: transparent;
+      cursor: grab;
+    }
+
+    .current-strip {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .strip-item {
+      min-width: 0;
+      padding: 12px 14px;
+      display: grid;
+      gap: 4px;
+      border-right: 1px solid var(--line);
+    }
+
+    .strip-item:last-child {
+      border-right: 0;
+    }
+
+    .strip-label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .strip-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 840;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .property-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .property-head {
+      display: grid;
+      gap: 5px;
+    }
+
+    .property-list {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .property-row {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--muted);
+      font-weight: 720;
+      line-height: 1.28;
+    }
+
+    .property-row.is-active {
+      border-color: rgba(35, 104, 162, 0.36);
+      background: #edf6fb;
+      color: var(--blue-dark);
+    }
+
+    .property-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--cyan);
+      margin-top: 2px;
+    }
+
+    .status-pill {
+      justify-content: center;
+      border-color: rgba(216, 148, 37, 0.3);
+      color: #8d5c16;
+      background: rgba(216, 148, 37, 0.12);
+    }
+
+    .status-pill.is-correct {
+      color: var(--cyan-dark);
+      border-color: rgba(45, 145, 164, 0.34);
+      background: rgba(45, 145, 164, 0.1);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .legend-item {
+      min-width: 0;
+      padding: 14px 16px;
+      display: grid;
+      gap: 5px;
+      border-right: 1px solid var(--line);
+    }
+
+    .legend-item:last-child {
+      border-right: 0;
+    }
+
+    .legend-title {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 760;
+      line-height: 1.2;
+    }
+
+    .legend-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      font-weight: 820;
+      line-height: 1.15;
+    }
+
+    .control-panel {
+      padding: clamp(16px, 2.4vw, 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-block {
+      display: grid;
+      gap: 11px;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 11px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #f9fbfb);
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .slider-number {
+      color: var(--blue-dark);
+      font-weight: 840;
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .scale-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 680;
+    }
+
+    .step-button,
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .step-button {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fbfcfa;
+    }
+
+    .stat.full {
+      grid-column: 1 / -1;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.25;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-value {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      font-weight: 860;
+      line-height: 1;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value.small {
+      font-size: 1.03rem;
+      line-height: 1.28;
+    }
+
+    .actions,
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .preset-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      padding: 11px 12px;
+    }
+
+    .action-button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .action-button.warn {
+      color: #9a4a3e;
+    }
+
+    .preset-button {
+      color: var(--blue-dark);
+      background: rgba(35, 104, 162, 0.08);
+      border-color: rgba(35, 104, 162, 0.24);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 760;
+    }
+
+    .toggle-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+    }
+
+    .observation-line {
+      min-height: 104px;
+      border-left: 5px solid var(--gold);
+      padding: 12px 14px;
+      background: rgba(216, 148, 37, 0.12);
+      border-radius: 0 8px 8px 0;
+      color: #463821;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .hint-line {
+      min-height: 58px;
+      border: 1px solid rgba(35, 104, 162, 0.22);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: rgba(35, 104, 162, 0.08);
+      color: var(--blue-dark);
+      font-weight: 690;
+      line-height: 1.38;
+    }
+
+    .quiz-box {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #f9fbfb);
+    }
+
+    .quiz-question {
+      margin: 0;
+      color: var(--ink);
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .quiz-option.is-right {
+      border-color: rgba(45, 145, 164, 0.45);
+      background: rgba(45, 145, 164, 0.12);
+      color: var(--cyan-dark);
+    }
+
+    .quiz-option.is-wrong {
+      border-color: rgba(204, 91, 74, 0.42);
+      background: rgba(204, 91, 74, 0.1);
+      color: #9a4a3e;
+    }
+
+    .quiz-feedback {
+      min-height: 38px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .confetti-layer {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 9px;
+      height: 14px;
+      border-radius: 3px;
+      animation: confettiFall 900ms ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(68vh) rotate(420deg);
+        opacity: 0;
+      }
+    }
+
+    .step-button:focus-visible,
+    .action-button:focus-visible,
+    .preset-button:focus-visible,
+    .quiz-option:focus-visible,
+    input[type="range"]:focus-visible,
+    .drag-hit:focus-visible {
+      outline: 3px solid rgba(31, 100, 216, 0.35);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .step-button,
+      .action-button,
+      .preset-button,
+      .quiz-option {
+        transition: transform 130ms ease, box-shadow 130ms ease, background 130ms ease, border-color 130ms ease;
+      }
+
+      .step-button:hover,
+      .action-button:hover,
+      .preset-button:hover,
+      .quiz-option:hover {
+        transform: translateY(-1px);
+      }
+    }
+
+    @media (max-width: 940px) {
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .scorebar {
+        justify-content: start;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .workbench {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .challenge-bar,
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+
+      .target-card {
+        justify-self: start;
+      }
+
+      .mirror-zone {
+        min-height: 370px;
+      }
+
+      .scene-frame {
+        aspect-ratio: 1.1;
+      }
+
+      .property-panel {
+        grid-template-rows: auto auto auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      header {
+        padding-inline: 14px;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .current-strip,
+      .legend,
+      .readout,
+      .actions,
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .strip-item,
+      .legend-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .strip-item:last-child,
+      .legend-item:last-child {
+        border-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <p class="kicker">NCERT Classes 6-7 Science</p>
+        <h1>Reflection in Mirrors Lab</h1>
+      </div>
+      <div class="scorebar" aria-label="progress">
+        <div class="pill">
+          <span class="pill-dot" aria-hidden="true"></span>
+          Medium Activity
+        </div>
+        <div class="pill" id="xpPill">0 XP</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage-shell" aria-label="plane mirror image formation simulator">
+        <div class="challenge-bar">
+          <div class="challenge-copy">
+            <h2 id="challengeTitle">Make the image 3 m behind the mirror</h2>
+            <p class="prompt" id="challengePrompt">Move the object until the image distance becomes 3 m.</p>
+          </div>
+          <div class="target-card" aria-label="target image distance">
+            <span class="target-label">Target Image</span>
+            <span class="target-value" id="targetValue">3 m</span>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="mirror-zone">
+            <div class="scene-frame">
+              <svg id="mirrorSvg" class="mirror-svg" viewBox="0 0 760 540" role="img" aria-labelledby="sceneTitle sceneDesc">
+                <title id="sceneTitle">Plane mirror image formation</title>
+                <desc id="sceneDesc">A candle object stands in front of a vertical plane mirror. A virtual image appears behind the mirror at the same distance.</desc>
+              </svg>
+            </div>
+            <div class="current-strip" aria-label="current mirror measurements">
+              <div class="strip-item">
+                <span class="strip-label">Object Distance</span>
+                <span id="objectStrip" class="strip-value">5 m</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Image Distance</span>
+                <span id="imageStrip" class="strip-value">5 m</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Image Type</span>
+                <span id="typeStrip" class="strip-value">Virtual</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="property-panel" aria-label="image properties">
+            <div class="property-head">
+              <h3>Image Properties</h3>
+              <p class="prompt">Plane mirrors always keep these rules.</p>
+            </div>
+            <div class="property-list">
+              <div class="property-row is-active">
+                <span class="property-dot" aria-hidden="true"></span>
+                <span>Image forms behind the mirror.</span>
+              </div>
+              <div class="property-row is-active">
+                <span class="property-dot" aria-hidden="true"></span>
+                <span>Image distance equals object distance.</span>
+              </div>
+              <div class="property-row is-active">
+                <span class="property-dot" aria-hidden="true"></span>
+                <span>Image is virtual, upright, and same size.</span>
+              </div>
+              <div class="property-row is-active">
+                <span class="property-dot" aria-hidden="true"></span>
+                <span>Left and right appear interchanged.</span>
+              </div>
+            </div>
+            <div id="statusPill" class="pill status-pill" aria-live="polite">Need 2 m closer</div>
+          </aside>
+        </div>
+
+        <div class="legend" aria-label="concept summary">
+          <div class="legend-item">
+            <span class="legend-title">Mirror Rule</span>
+            <span class="legend-value" id="ruleLegend">Object distance = image distance</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Rays</span>
+            <span class="legend-value" id="rayLegend">Reflected rays seem to come from the image.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Notice</span>
+            <span class="legend-value" id="noticeLegend">Moving the object moves the image by the same amount.</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="activity controls and observations">
+        <div class="panel-block">
+          <h2>Move Object and Mirror</h2>
+          <div class="slider-block">
+            <div class="slider-row">
+              <button class="step-button" type="button" data-step="distance:-1" aria-label="move object closer">-</button>
+              <label for="distanceSlider">Object distance</label>
+              <span id="distanceNumber" class="slider-number">5 m</span>
+              <button class="step-button" type="button" data-step="distance:1" aria-label="move object farther">+</button>
+            </div>
+            <input id="distanceSlider" type="range" min="1" max="7" step="1" value="5" aria-describedby="distanceScale">
+            <div id="distanceScale" class="scale-row" aria-hidden="true">
+              <span>1 m</span>
+              <span>7 m</span>
+            </div>
+          </div>
+
+          <div class="slider-block">
+            <div class="slider-row">
+              <button class="step-button" type="button" data-step="mirror:-1" aria-label="move mirror left">-</button>
+              <label for="mirrorSlider">Mirror position</label>
+              <span id="mirrorNumber" class="slider-number">5 m</span>
+              <button class="step-button" type="button" data-step="mirror:1" aria-label="move mirror right">+</button>
+            </div>
+            <input id="mirrorSlider" type="range" min="4" max="8" step="1" value="5" aria-describedby="mirrorScale">
+            <div id="mirrorScale" class="scale-row" aria-hidden="true">
+              <span>left</span>
+              <span>right</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="readout" aria-label="live reflection values">
+          <div class="stat">
+            <span class="stat-label">Object</span>
+            <span id="objectReadout" class="stat-value">5 m</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Image</span>
+            <span id="imageReadout" class="stat-value">5 m</span>
+          </div>
+          <div class="stat full">
+            <span class="stat-label">Relation</span>
+            <span id="relationReadout" class="stat-value small">The image is 5 m behind the mirror because the object is 5 m in front.</span>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="actions">
+            <button id="checkButton" type="button" class="action-button primary">Check</button>
+            <button id="resetButton" type="button" class="action-button warn">Reset</button>
+            <button id="hintButton" type="button" class="action-button">Hint</button>
+            <button id="newTargetButton" type="button" class="action-button">New Target</button>
+          </div>
+          <div class="preset-grid">
+            <button type="button" class="preset-button" data-preset="2">2 m</button>
+            <button type="button" class="preset-button" data-preset="3">3 m</button>
+            <button type="button" class="preset-button" data-preset="4">4 m</button>
+            <button type="button" class="preset-button" data-preset="5">5 m</button>
+            <button type="button" class="preset-button" data-preset="6">6 m</button>
+            <button type="button" class="preset-button" data-preset="7">7 m</button>
+          </div>
+          <label class="toggle-row" for="rayToggle">
+            <span>Show light rays</span>
+            <input id="rayToggle" type="checkbox" checked>
+          </label>
+        </div>
+
+        <div class="panel-block">
+          <h2>Observation</h2>
+          <div id="observationLine" class="observation-line" aria-live="polite">
+            The object is 5 m in front of the mirror, so the image appears 5 m behind the mirror.
+          </div>
+          <div id="hintLine" class="hint-line" hidden>
+            To make the image 3 m behind the mirror, place the object 3 m in front of the mirror.
+          </div>
+        </div>
+
+        <div class="quiz-box" aria-label="quick question">
+          <h2>Quick Check</h2>
+          <p id="quizQuestion" class="quiz-question">If an object is 4 m in front of a plane mirror, where is its image?</p>
+          <div id="quizOptions" class="quiz-options"></div>
+          <div id="quizFeedback" class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+  <script>
+    const state = {
+      objectDistance: 5,
+      mirrorPosition: 5,
+      targetDistance: 3,
+      showRays: true,
+      xp: 0,
+      completed: new Set(),
+      dragging: null
+    };
+
+    const scene = {
+      meterPx: 42,
+      mirrorBaseX: 244,
+      mirrorStepPx: 38,
+      floorY: 410,
+      mirrorTopY: 110,
+      mirrorBottomY: 410,
+      objectHeight: 160,
+      eyeX: 92,
+      eyeY: 248
+    };
+
+    const targetDistances = [2, 3, 4, 5, 6, 7];
+
+    const els = {
+      mirrorSvg: document.getElementById("mirrorSvg"),
+      distanceSlider: document.getElementById("distanceSlider"),
+      mirrorSlider: document.getElementById("mirrorSlider"),
+      distanceNumber: document.getElementById("distanceNumber"),
+      mirrorNumber: document.getElementById("mirrorNumber"),
+      objectStrip: document.getElementById("objectStrip"),
+      imageStrip: document.getElementById("imageStrip"),
+      typeStrip: document.getElementById("typeStrip"),
+      objectReadout: document.getElementById("objectReadout"),
+      imageReadout: document.getElementById("imageReadout"),
+      relationReadout: document.getElementById("relationReadout"),
+      ruleLegend: document.getElementById("ruleLegend"),
+      rayLegend: document.getElementById("rayLegend"),
+      noticeLegend: document.getElementById("noticeLegend"),
+      observationLine: document.getElementById("observationLine"),
+      hintLine: document.getElementById("hintLine"),
+      targetValue: document.getElementById("targetValue"),
+      statusPill: document.getElementById("statusPill"),
+      xpPill: document.getElementById("xpPill"),
+      rayToggle: document.getElementById("rayToggle"),
+      quizOptions: document.getElementById("quizOptions"),
+      quizFeedback: document.getElementById("quizFeedback"),
+      confettiLayer: document.getElementById("confettiLayer")
+    };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function mirrorX() {
+      return scene.mirrorBaseX + (state.mirrorPosition - 4) * scene.mirrorStepPx;
+    }
+
+    function objectX() {
+      return mirrorX() - state.objectDistance * scene.meterPx;
+    }
+
+    function imageX() {
+      return mirrorX() + state.objectDistance * scene.meterPx;
+    }
+
+    function meters(value) {
+      return value + " m";
+    }
+
+    function lineYAtX(start, end, x) {
+      const ratio = (x - start.x) / (end.x - start.x);
+      return start.y + ratio * (end.y - start.y);
+    }
+
+    function objectMarkup(x, ghost) {
+      const baseY = scene.floorY;
+      const topY = baseY - scene.objectHeight;
+      const stemClass = ghost ? "image-stem" : "object-stem";
+      const flameClass = ghost ? "image-flame" : "object-flame";
+      const baseClass = ghost ? "image-base" : "object-base";
+      const bodyClass = ghost ? "image-body" : "object-body";
+      const leftLetter = ghost ? "R" : "L";
+      const rightLetter = ghost ? "L" : "R";
+      const textClass = ghost ? "lr-text image-text" : "lr-text";
+      return [
+        '<g class="' + bodyClass + '" data-object="' + (ghost ? "image" : "object") + '">',
+        '<ellipse cx="' + x + '" cy="' + (baseY + 8) + '" rx="34" ry="10" fill="rgba(31, 39, 44, 0.14)"></ellipse>',
+        '<rect class="' + stemClass + '" x="' + (x - 17) + '" y="' + (topY + 34) + '" width="34" height="102" rx="10"></rect>',
+        '<path class="' + flameClass + '" d="M ' + x + ' ' + (topY - 7) + ' C ' + (x - 26) + ' ' + (topY + 30) + ', ' + (x - 9) + ' ' + (topY + 58) + ', ' + x + ' ' + (topY + 58) + ' C ' + (x + 16) + ' ' + (topY + 47) + ', ' + (x + 27) + ' ' + (topY + 21) + ', ' + x + ' ' + (topY - 7) + ' Z"></path>',
+        '<rect class="' + baseClass + '" x="' + (x - 38) + '" y="' + (baseY - 26) + '" width="76" height="28" rx="9"></rect>',
+        '<rect class="lr-tag" x="' + (x - 55) + '" y="' + (baseY - 90) + '" width="26" height="24" rx="7"></rect>',
+        '<text class="' + textClass + '" x="' + (x - 42) + '" y="' + (baseY - 73) + '" text-anchor="middle">' + leftLetter + '</text>',
+        '<rect class="lr-tag" x="' + (x + 29) + '" y="' + (baseY - 90) + '" width="26" height="24" rx="7"></rect>',
+        '<text class="' + textClass + '" x="' + (x + 42) + '" y="' + (baseY - 73) + '" text-anchor="middle">' + rightLetter + '</text>',
+        ghost ? "" : '<rect class="drag-hit" id="objectHit" tabindex="0" role="slider" aria-label="move object" aria-valuemin="1" aria-valuemax="7" aria-valuenow="' + state.objectDistance + '" x="' + (x - 62) + '" y="' + (topY - 12) + '" width="124" height="178" rx="14"></rect>',
+        '</g>'
+      ].join("");
+    }
+
+    function raysMarkup() {
+      const mx = mirrorX();
+      const ox = objectX();
+      const ix = imageX();
+      const eye = { x: scene.eyeX, y: scene.eyeY };
+      const topObj = { x: ox, y: scene.floorY - scene.objectHeight + 16 };
+      const midObj = { x: ox, y: scene.floorY - 92 };
+      const topImage = { x: ix, y: topObj.y };
+      const midImage = { x: ix, y: midObj.y };
+      const hitTop = { x: mx, y: lineYAtX(topImage, eye, mx) };
+      const hitMid = { x: mx, y: lineYAtX(midImage, eye, mx) };
+      const dim = state.showRays ? "" : " dimmed";
+      return [
+        '<g id="rayGroup">',
+        '<line class="normal-line' + dim + '" x1="' + (mx - 48) + '" y1="' + hitTop.y.toFixed(1) + '" x2="' + (mx + 48) + '" y2="' + hitTop.y.toFixed(1) + '"></line>',
+        '<path class="ray' + dim + '" d="M ' + topObj.x.toFixed(1) + ' ' + topObj.y.toFixed(1) + ' L ' + hitTop.x.toFixed(1) + ' ' + hitTop.y.toFixed(1) + '"></path>',
+        '<path class="ray reflected' + dim + '" d="M ' + hitTop.x.toFixed(1) + ' ' + hitTop.y.toFixed(1) + ' L ' + eye.x + ' ' + eye.y + '"></path>',
+        '<path class="ray extension' + dim + '" d="M ' + hitTop.x.toFixed(1) + ' ' + hitTop.y.toFixed(1) + ' L ' + topImage.x.toFixed(1) + ' ' + topImage.y.toFixed(1) + '"></path>',
+        '<path class="ray' + dim + '" d="M ' + midObj.x.toFixed(1) + ' ' + midObj.y.toFixed(1) + ' L ' + hitMid.x.toFixed(1) + ' ' + hitMid.y.toFixed(1) + '"></path>',
+        '<path class="ray reflected' + dim + '" d="M ' + hitMid.x.toFixed(1) + ' ' + hitMid.y.toFixed(1) + ' L ' + eye.x + ' ' + eye.y + '"></path>',
+        '<path class="ray extension' + dim + '" d="M ' + hitMid.x.toFixed(1) + ' ' + hitMid.y.toFixed(1) + ' L ' + midImage.x.toFixed(1) + ' ' + midImage.y.toFixed(1) + '"></path>',
+        '</g>'
+      ].join("");
+    }
+
+    function measurementMarkup() {
+      const mx = mirrorX();
+      const ox = objectX();
+      const ix = imageX();
+      const y = scene.floorY + 38;
+      const objectMid = (ox + mx) / 2;
+      const imageMid = (ix + mx) / 2;
+      return [
+        '<line class="measure-line" x1="' + ox + '" y1="' + y + '" x2="' + mx + '" y2="' + y + '"></line>',
+        '<rect class="measure-label-bg" x="' + (objectMid - 54) + '" y="' + (y - 42) + '" width="108" height="28" rx="8"></rect>',
+        '<text class="svg-label" x="' + objectMid + '" y="' + (y - 23) + '" text-anchor="middle">Object ' + meters(state.objectDistance) + '</text>',
+        '<line class="measure-line" x1="' + mx + '" y1="' + (y + 30) + '" x2="' + ix + '" y2="' + (y + 30) + '"></line>',
+        '<rect class="measure-label-bg" x="' + (imageMid - 50) + '" y="' + (y + 2) + '" width="100" height="28" rx="8"></rect>',
+        '<text class="svg-label" x="' + imageMid + '" y="' + (y + 21) + '" text-anchor="middle">Image ' + meters(state.objectDistance) + '</text>'
+      ].join("");
+    }
+
+    function mirrorMarkup() {
+      const mx = mirrorX();
+      return [
+        '<line class="mirror-back" x1="' + (mx + 10) + '" y1="' + scene.mirrorTopY + '" x2="' + (mx + 10) + '" y2="' + scene.mirrorBottomY + '"></line>',
+        '<rect id="mirrorBody" class="mirror-body" tabindex="0" role="slider" aria-label="move mirror" aria-valuemin="4" aria-valuemax="8" aria-valuenow="' + state.mirrorPosition + '" x="' + (mx - 10) + '" y="' + scene.mirrorTopY + '" width="20" height="' + (scene.mirrorBottomY - scene.mirrorTopY) + '" rx="8"></rect>',
+        '<rect class="measure-label-bg" x="' + (mx - 53) + '" y="' + (scene.mirrorTopY - 42) + '" width="106" height="30" rx="8"></rect>',
+        '<text class="svg-label" x="' + mx + '" y="' + (scene.mirrorTopY - 22) + '" text-anchor="middle">Plane mirror</text>'
+      ].join("");
+    }
+
+    function eyeMarkup() {
+      return [
+        '<g aria-label="observer eye">',
+        '<circle class="eye-skin" cx="' + scene.eyeX + '" cy="' + scene.eyeY + '" r="15"></circle>',
+        '<path class="eye-shirt" d="M ' + (scene.eyeX - 22) + ' ' + (scene.eyeY + 45) + ' Q ' + scene.eyeX + ' ' + (scene.eyeY + 18) + ' ' + (scene.eyeX + 22) + ' ' + (scene.eyeY + 45) + ' L ' + (scene.eyeX + 17) + ' ' + (scene.eyeY + 82) + ' H ' + (scene.eyeX - 17) + ' Z"></path>',
+        '<circle cx="' + (scene.eyeX + 5) + '" cy="' + (scene.eyeY - 1) + '" r="3" fill="#172026"></circle>',
+        '<path d="M ' + (scene.eyeX + 12) + ' ' + (scene.eyeY - 2) + ' L ' + (scene.eyeX + 28) + ' ' + (scene.eyeY - 10) + '" stroke="#172026" stroke-width="3" stroke-linecap="round"></path>',
+        '<text class="svg-small" x="' + scene.eyeX + '" y="' + (scene.eyeY + 104) + '" text-anchor="middle">Eye</text>',
+        '</g>'
+      ].join("");
+    }
+
+    function roomMarkup() {
+      const lines = [];
+      for (let x = 70; x <= 700; x += scene.meterPx) {
+        lines.push('<line class="grid-line" x1="' + x + '" y1="106" x2="' + x + '" y2="' + scene.floorY + '"></line>');
+      }
+      for (let y = 130; y <= scene.floorY; y += 42) {
+        lines.push('<line class="grid-line" x1="58" y1="' + y + '" x2="708" y2="' + y + '"></line>');
+      }
+      return [
+        '<rect class="room-bg" x="58" y="84" width="650" height="368" rx="18"></rect>',
+        lines.join(""),
+        '<rect class="floor" x="58" y="' + scene.floorY + '" width="650" height="42" rx="0"></rect>'
+      ].join("");
+    }
+
+    function renderSvg() {
+      const mx = mirrorX();
+      const ox = objectX();
+      const ix = imageX();
+      els.mirrorSvg.innerHTML = [
+        '<defs>',
+        '<linearGradient id="mirrorFill" x1="0" x2="1">',
+        '<stop offset="0" stop-color="#f3fbff"></stop>',
+        '<stop offset="0.52" stop-color="#8bb9c8"></stop>',
+        '<stop offset="1" stop-color="#e8f6fb"></stop>',
+        '</linearGradient>',
+        '<marker id="arrowEnd" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">',
+        '<path d="M 0 0 L 10 5 L 0 10 z" fill="#2d91a4"></path>',
+        '</marker>',
+        '<marker id="arrowStart" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto" markerUnits="strokeWidth">',
+        '<path d="M 10 0 L 0 5 L 10 10 z" fill="#2d91a4"></path>',
+        '</marker>',
+        '</defs>',
+        roomMarkup(),
+        objectMarkup(ix, true),
+        raysMarkup(),
+        mirrorMarkup(),
+        objectMarkup(ox, false),
+        eyeMarkup(),
+        measurementMarkup(),
+        '<rect class="measure-label-bg" x="' + (mx + 18) + '" y="' + (scene.mirrorBottomY - 126) + '" width="112" height="52" rx="8"></rect>',
+        '<text class="svg-small" x="' + (mx + 74) + '" y="' + (scene.mirrorBottomY - 105) + '" text-anchor="middle">Virtual image</text>',
+        '<text class="svg-label" x="' + (mx + 74) + '" y="' + (scene.mirrorBottomY - 84) + '" text-anchor="middle">behind mirror</text>'
+      ].join("");
+
+      document.getElementById("objectHit").addEventListener("pointerdown", function(event) {
+        beginDrag(event, "object");
+      });
+      document.getElementById("objectHit").addEventListener("keydown", objectKeydown);
+      document.getElementById("mirrorBody").addEventListener("pointerdown", function(event) {
+        beginDrag(event, "mirror");
+      });
+      document.getElementById("mirrorBody").addEventListener("keydown", mirrorKeydown);
+    }
+
+    function updateText() {
+      const diff = state.objectDistance - state.targetDistance;
+      const matched = diff === 0;
+      const distanceText = meters(state.objectDistance);
+      els.distanceSlider.value = state.objectDistance;
+      els.mirrorSlider.value = state.mirrorPosition;
+      els.distanceNumber.textContent = distanceText;
+      els.mirrorNumber.textContent = meters(state.mirrorPosition);
+      els.objectStrip.textContent = distanceText;
+      els.imageStrip.textContent = distanceText;
+      els.typeStrip.textContent = "Virtual";
+      els.objectReadout.textContent = distanceText;
+      els.imageReadout.textContent = distanceText;
+      els.relationReadout.textContent = "The image is " + distanceText + " behind the mirror because the object is " + distanceText + " in front.";
+      els.ruleLegend.textContent = "Object distance = image distance";
+      els.rayLegend.textContent = state.showRays ? "Reflected rays seem to come from the image." : "Light rays are hidden for a clearer view.";
+      els.noticeLegend.textContent = "Moving the mirror shifts both object and image positions in the room.";
+      els.targetValue.textContent = meters(state.targetDistance);
+      els.xpPill.textContent = state.xp + " XP";
+      els.statusPill.classList.toggle("is-correct", matched);
+      if (matched) {
+        els.statusPill.textContent = "Target matched";
+      } else if (diff > 0) {
+        els.statusPill.textContent = "Need " + meters(Math.abs(diff)) + " closer";
+      } else {
+        els.statusPill.textContent = "Need " + meters(Math.abs(diff)) + " farther";
+      }
+      els.observationLine.textContent = "The object is " + distanceText + " in front of the mirror, so the image appears " + distanceText + " behind the mirror. The image is virtual, upright, same size, and laterally inverted.";
+      els.hintLine.textContent = "To make the image " + meters(state.targetDistance) + " behind the mirror, place the object " + meters(state.targetDistance) + " in front of the mirror.";
+    }
+
+    function render() {
+      renderSvg();
+      updateText();
+      checkAutoAward();
+    }
+
+    function setDistance(value) {
+      state.objectDistance = clamp(Math.round(value), 1, 7);
+      render();
+    }
+
+    function setMirror(value) {
+      state.mirrorPosition = clamp(Math.round(value), 4, 8);
+      render();
+    }
+
+    function svgPoint(event) {
+      const point = els.mirrorSvg.createSVGPoint();
+      point.x = event.clientX;
+      point.y = event.clientY;
+      return point.matrixTransform(els.mirrorSvg.getScreenCTM().inverse());
+    }
+
+    function beginDrag(event, kind) {
+      if (event.button !== undefined && event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      state.dragging = kind;
+      onDragMove(event);
+      document.addEventListener("pointermove", onDragMove);
+      document.addEventListener("pointerup", endDrag, { once: true });
+      document.addEventListener("pointercancel", cancelDrag, { once: true });
+    }
+
+    function onDragMove(event) {
+      if (!state.dragging) {
+        return;
+      }
+      const point = svgPoint(event);
+      if (state.dragging === "object") {
+        const nextDistance = Math.round((mirrorX() - point.x) / scene.meterPx);
+        setDistance(nextDistance);
+      } else {
+        const nextMirror = Math.round((point.x - scene.mirrorBaseX) / scene.mirrorStepPx + 4);
+        setMirror(nextMirror);
+      }
+    }
+
+    function endDrag() {
+      state.dragging = null;
+      document.removeEventListener("pointermove", onDragMove);
+      document.removeEventListener("pointercancel", cancelDrag);
+    }
+
+    function cancelDrag() {
+      state.dragging = null;
+      document.removeEventListener("pointermove", onDragMove);
+      document.removeEventListener("pointerup", endDrag);
+    }
+
+    function objectKeydown(event) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setDistance(state.objectDistance + 1);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setDistance(state.objectDistance - 1);
+      }
+    }
+
+    function mirrorKeydown(event) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setMirror(state.mirrorPosition - 1);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setMirror(state.mirrorPosition + 1);
+      }
+    }
+
+    function checkAutoAward() {
+      const key = state.targetDistance + ":" + state.objectDistance;
+      if (state.objectDistance === state.targetDistance && !state.completed.has(key)) {
+        state.completed.add(key);
+        state.xp += 10;
+        els.xpPill.textContent = state.xp + " XP";
+        burstConfetti();
+      }
+    }
+
+    function burstConfetti() {
+      const colors = ["#2368a2", "#2d91a4", "#d89425", "#cc5b4a", "#6b5bb3"];
+      els.confettiLayer.innerHTML = "";
+      for (let i = 0; i < 24; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = (10 + Math.random() * 80) + "%";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = (Math.random() * 120) + "ms";
+        piece.style.transform = "rotate(" + (Math.random() * 180) + "deg)";
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(function() {
+        els.confettiLayer.innerHTML = "";
+      }, 1100);
+    }
+
+    function checkAnswer() {
+      if (state.objectDistance === state.targetDistance) {
+        els.observationLine.textContent = "Yes. In a plane mirror, a " + meters(state.objectDistance) + " object distance makes a " + meters(state.objectDistance) + " image distance.";
+        burstConfetti();
+      } else {
+        els.observationLine.textContent = "Not yet. The image distance is always equal to the object distance. Set the object distance to " + meters(state.targetDistance) + ".";
+      }
+    }
+
+    function nextTarget() {
+      const currentIndex = targetDistances.indexOf(state.targetDistance);
+      state.targetDistance = targetDistances[(currentIndex + 1) % targetDistances.length];
+      render();
+    }
+
+    function renderQuiz() {
+      const options = [
+        { label: "4 m behind the mirror", right: true },
+        { label: "2 m behind the mirror", right: false },
+        { label: "4 m in front of the mirror", right: false },
+        { label: "It disappears", right: false }
+      ];
+      els.quizOptions.innerHTML = "";
+      els.quizFeedback.textContent = "";
+      options.forEach(function(option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "quiz-option";
+        button.textContent = option.label;
+        button.addEventListener("click", function() {
+          answerQuiz(option, button);
+        });
+        els.quizOptions.appendChild(button);
+      });
+    }
+
+    function answerQuiz(option, button) {
+      els.quizOptions.querySelectorAll(".quiz-option").forEach(function(item) {
+        item.classList.remove("is-right", "is-wrong");
+      });
+      button.classList.add(option.right ? "is-right" : "is-wrong");
+      els.quizFeedback.textContent = option.right
+        ? "Correct. A plane mirror forms the image the same distance behind the mirror."
+        : "Almost. The image distance equals the object distance, but it appears behind the mirror.";
+    }
+
+    els.distanceSlider.addEventListener("input", function(event) {
+      setDistance(Number(event.target.value));
+    });
+    els.mirrorSlider.addEventListener("input", function(event) {
+      setMirror(Number(event.target.value));
+    });
+    document.querySelectorAll("[data-step]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        const parts = button.dataset.step.split(":");
+        if (parts[0] === "distance") {
+          setDistance(state.objectDistance + Number(parts[1]));
+        } else {
+          setMirror(state.mirrorPosition + Number(parts[1]));
+        }
+      });
+    });
+    document.querySelectorAll("[data-preset]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setDistance(Number(button.dataset.preset));
+      });
+    });
+    els.rayToggle.addEventListener("change", function(event) {
+      state.showRays = event.target.checked;
+      render();
+    });
+    document.getElementById("checkButton").addEventListener("click", checkAnswer);
+    document.getElementById("resetButton").addEventListener("click", function() {
+      state.objectDistance = 5;
+      state.mirrorPosition = 5;
+      state.targetDistance = 3;
+      state.showRays = true;
+      els.rayToggle.checked = true;
+      render();
+    });
+    document.getElementById("hintButton").addEventListener("click", function() {
+      els.hintLine.hidden = !els.hintLine.hidden;
+    });
+    document.getElementById("newTargetButton").addEventListener("click", nextTarget);
+
+    renderQuiz();
+    render();
+  </script>
+</body>
+</html>

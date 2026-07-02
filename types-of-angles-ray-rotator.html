@@ -1,0 +1,1542 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Types of Angles Lab: Rotate Rays</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f4ef;
+      --surface: #ffffff;
+      --surface-soft: #fbfaf5;
+      --ink: #20252b;
+      --muted: #626d76;
+      --line: #d9ded8;
+      --blue: #2166a5;
+      --blue-dark: #16496f;
+      --mint: #2f8f7a;
+      --mint-dark: #216858;
+      --gold: #d79b2d;
+      --coral: #d75b4c;
+      --violet: #6f5fb8;
+      --plum: #4b3f72;
+      --ray: #26333d;
+      --focus: #1f64d8;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(221, 237, 246, 0.74), rgba(246, 244, 239, 0.94) 43%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      padding: clamp(16px, 3vw, 28px) clamp(16px, 4vw, 44px) 10px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(217, 222, 216, 0.78);
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .kicker {
+      margin: 0 0 5px;
+      color: var(--blue-dark);
+      font-size: 0.78rem;
+      font-weight: 780;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 3.5vw, 2.75rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: clamp(1.05rem, 2.5vw, 1.45rem);
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    .scorebar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.76);
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(215, 155, 45, 0.16);
+    }
+
+    main {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      padding: clamp(16px, 3vw, 30px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 370px);
+      gap: clamp(18px, 3vw, 28px);
+      align-items: stretch;
+    }
+
+    .stage-shell,
+    .control-panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 46px rgba(32, 37, 43, 0.08);
+      min-width: 0;
+    }
+
+    .stage-shell {
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .challenge-bar {
+      padding: clamp(16px, 2.4vw, 22px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #fbfaf5);
+    }
+
+    .challenge-copy {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .prompt {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .target-card {
+      min-width: 128px;
+      display: grid;
+      gap: 3px;
+      justify-items: center;
+      padding: 11px 14px;
+      border: 1px solid rgba(33, 102, 165, 0.28);
+      border-radius: 8px;
+      background: #edf6fb;
+      color: var(--blue-dark);
+      font-weight: 820;
+    }
+
+    .target-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 780;
+      text-transform: uppercase;
+    }
+
+    .target-value {
+      font-size: clamp(1.1rem, 3vw, 1.42rem);
+      line-height: 1;
+    }
+
+    .workbench {
+      min-height: 530px;
+      padding: clamp(16px, 2.5vw, 24px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
+      gap: clamp(16px, 2.6vw, 24px);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(215, 155, 45, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(246, 244, 239, 0.6));
+    }
+
+    .angle-zone {
+      position: relative;
+      min-height: 440px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 12px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(251, 250, 245, 0.92)),
+        var(--surface-soft);
+      overflow: hidden;
+    }
+
+    .angle-frame {
+      width: min(100%, 640px);
+      aspect-ratio: 1.32;
+      display: grid;
+      place-items: center;
+      padding: clamp(8px, 2vw, 16px);
+    }
+
+    .angle-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+      touch-action: none;
+    }
+
+    .board-bg {
+      fill: #eef4f5;
+    }
+
+    .board-ring {
+      fill: none;
+      stroke: rgba(98, 109, 118, 0.14);
+      stroke-width: 1.2;
+    }
+
+    .tick {
+      stroke: rgba(98, 109, 118, 0.34);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .tick.major {
+      stroke: rgba(32, 37, 43, 0.42);
+      stroke-width: 2.4;
+    }
+
+    .tick-label {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 740;
+    }
+
+    .sector {
+      fill: rgba(33, 102, 165, 0.16);
+      stroke: none;
+    }
+
+    .sector.acute {
+      fill: rgba(47, 143, 122, 0.18);
+    }
+
+    .sector.right {
+      fill: rgba(215, 155, 45, 0.2);
+    }
+
+    .sector.obtuse {
+      fill: rgba(33, 102, 165, 0.18);
+    }
+
+    .sector.straight {
+      fill: rgba(111, 95, 184, 0.16);
+    }
+
+    .sector.reflex {
+      fill: rgba(215, 91, 76, 0.15);
+    }
+
+    .arc {
+      fill: none;
+      stroke: var(--blue);
+      stroke-width: 8;
+      stroke-linecap: round;
+      filter: drop-shadow(0 5px 8px rgba(33, 102, 165, 0.16));
+    }
+
+    .arc.acute {
+      stroke: var(--mint);
+    }
+
+    .arc.right {
+      stroke: var(--gold);
+    }
+
+    .arc.obtuse {
+      stroke: var(--blue);
+    }
+
+    .arc.straight {
+      stroke: var(--violet);
+    }
+
+    .arc.reflex {
+      stroke: var(--coral);
+    }
+
+    .ray {
+      stroke: var(--ray);
+      stroke-width: 8;
+      stroke-linecap: round;
+      marker-end: url(#arrowHead);
+      filter: drop-shadow(0 8px 8px rgba(32, 37, 43, 0.15));
+    }
+
+    .moving-ray {
+      stroke: var(--coral);
+      cursor: grab;
+    }
+
+    .moving-ray:active {
+      cursor: grabbing;
+    }
+
+    .ray-hit {
+      stroke: transparent;
+      stroke-width: 34;
+      stroke-linecap: round;
+      cursor: grab;
+    }
+
+    .vertex {
+      fill: #ffffff;
+      stroke: var(--ray);
+      stroke-width: 5;
+    }
+
+    .right-box {
+      fill: rgba(215, 155, 45, 0.22);
+      stroke: var(--gold);
+      stroke-width: 3;
+      stroke-linejoin: round;
+    }
+
+    .svg-label-bg {
+      fill: rgba(255, 255, 255, 0.92);
+      stroke: rgba(217, 222, 216, 0.95);
+      stroke-width: 1;
+    }
+
+    .svg-label {
+      fill: var(--ink);
+      font-size: 15px;
+      font-weight: 780;
+    }
+
+    .svg-small {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .current-strip {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .strip-item {
+      min-width: 0;
+      padding: 12px 14px;
+      display: grid;
+      gap: 4px;
+      border-right: 1px solid var(--line);
+    }
+
+    .strip-item:last-child {
+      border-right: 0;
+    }
+
+    .strip-label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .strip-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 840;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .type-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .type-head {
+      display: grid;
+      gap: 5px;
+    }
+
+    .type-list {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    .type-row.is-active {
+      border-color: rgba(33, 102, 165, 0.36);
+      background: #edf6fb;
+      color: var(--blue-dark);
+    }
+
+    .type-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .type-row[data-type="Acute"] .type-dot {
+      background: var(--mint);
+    }
+
+    .type-row[data-type="Right"] .type-dot {
+      background: var(--gold);
+    }
+
+    .type-row[data-type="Obtuse"] .type-dot {
+      background: var(--blue);
+    }
+
+    .type-row[data-type="Straight"] .type-dot {
+      background: var(--violet);
+    }
+
+    .type-row[data-type="Reflex"] .type-dot {
+      background: var(--coral);
+    }
+
+    .type-range {
+      justify-self: end;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      justify-content: center;
+      border-color: rgba(215, 155, 45, 0.3);
+      color: #8d5c16;
+      background: rgba(215, 155, 45, 0.12);
+    }
+
+    .status-pill.is-correct {
+      color: var(--mint-dark);
+      border-color: rgba(47, 143, 122, 0.34);
+      background: rgba(47, 143, 122, 0.1);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .legend-item {
+      min-width: 0;
+      padding: 14px 16px;
+      display: grid;
+      gap: 5px;
+      border-right: 1px solid var(--line);
+    }
+
+    .legend-item:last-child {
+      border-right: 0;
+    }
+
+    .legend-title {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 760;
+      line-height: 1.2;
+    }
+
+    .legend-value {
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      font-weight: 820;
+      line-height: 1.15;
+    }
+
+    .control-panel {
+      padding: clamp(16px, 2.4vw, 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-block {
+      display: grid;
+      gap: 11px;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 11px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #fbfaf5);
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .slider-number {
+      color: var(--blue-dark);
+      font-weight: 840;
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .scale-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 680;
+    }
+
+    .step-button,
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .step-button {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fbfcfa;
+    }
+
+    .stat.full {
+      grid-column: 1 / -1;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      line-height: 1.25;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-value {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      font-weight: 860;
+      line-height: 1;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value.small {
+      font-size: 1.03rem;
+      line-height: 1.28;
+    }
+
+    .actions,
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .preset-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .action-button,
+    .preset-button,
+    .quiz-option {
+      padding: 11px 12px;
+    }
+
+    .action-button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .action-button.warn {
+      color: #9a4a3e;
+    }
+
+    .preset-button {
+      color: var(--blue-dark);
+      background: rgba(33, 102, 165, 0.08);
+      border-color: rgba(33, 102, 165, 0.24);
+    }
+
+    .observation-line {
+      min-height: 98px;
+      border-left: 5px solid var(--gold);
+      padding: 12px 14px;
+      background: rgba(215, 155, 45, 0.12);
+      border-radius: 0 8px 8px 0;
+      color: #463821;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .hint-line {
+      min-height: 58px;
+      border: 1px solid rgba(33, 102, 165, 0.22);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: rgba(33, 102, 165, 0.08);
+      color: var(--blue-dark);
+      font-weight: 690;
+      line-height: 1.38;
+    }
+
+    .quiz-box {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #fbfaf5);
+    }
+
+    .quiz-question {
+      margin: 0;
+      color: var(--ink);
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .quiz-option.is-right {
+      border-color: rgba(47, 143, 122, 0.45);
+      background: rgba(47, 143, 122, 0.12);
+      color: var(--mint-dark);
+    }
+
+    .quiz-option.is-wrong {
+      border-color: rgba(215, 91, 76, 0.42);
+      background: rgba(215, 91, 76, 0.1);
+      color: #9a4a3e;
+    }
+
+    .quiz-feedback {
+      min-height: 38px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .confetti-layer {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 9px;
+      height: 14px;
+      border-radius: 3px;
+      animation: confettiFall 900ms ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(68vh) rotate(420deg);
+        opacity: 0;
+      }
+    }
+
+    .step-button:focus-visible,
+    .action-button:focus-visible,
+    .preset-button:focus-visible,
+    .quiz-option:focus-visible,
+    input[type="range"]:focus-visible,
+    .ray-hit:focus-visible {
+      outline: 3px solid rgba(31, 100, 216, 0.35);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .step-button,
+      .action-button,
+      .preset-button,
+      .quiz-option {
+        transition: transform 130ms ease, box-shadow 130ms ease, background 130ms ease, border-color 130ms ease;
+      }
+
+      .step-button:hover,
+      .action-button:hover,
+      .preset-button:hover,
+      .quiz-option:hover {
+        transform: translateY(-1px);
+      }
+    }
+
+    @media (max-width: 940px) {
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .scorebar {
+        justify-content: start;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .workbench {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .challenge-bar,
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+
+      .target-card {
+        justify-self: start;
+      }
+
+      .angle-zone {
+        min-height: 360px;
+      }
+
+      .angle-frame {
+        aspect-ratio: 1.08;
+      }
+
+      .type-panel {
+        grid-template-rows: auto auto auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      header {
+        padding-inline: 14px;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .current-strip,
+      .legend,
+      .readout,
+      .actions,
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .strip-item,
+      .legend-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .strip-item:last-child,
+      .legend-item:last-child {
+        border-bottom: 0;
+      }
+
+      .slider-row {
+        grid-template-columns: auto 1fr auto auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <p class="kicker">NCERT Classes 5-6 Mathematics</p>
+        <h1>Types of Angles Lab</h1>
+      </div>
+      <div class="scorebar" aria-label="progress">
+        <div class="pill">
+          <span class="pill-dot" aria-hidden="true"></span>
+          Easy Activity
+        </div>
+        <div class="pill" id="xpPill">0 XP</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage-shell" aria-label="angle ray rotation simulator">
+        <div class="challenge-bar">
+          <div class="challenge-copy">
+            <h2 id="challengeTitle">Make an acute angle</h2>
+            <p class="prompt" id="challengePrompt">Rotate the red ray until the angle is more than 0° and less than 90°.</p>
+          </div>
+          <div class="target-card" aria-label="target angle type">
+            <span class="target-label">Target Type</span>
+            <span class="target-value" id="targetValue">Acute</span>
+          </div>
+        </div>
+
+        <div class="workbench">
+          <div class="angle-zone">
+            <div class="angle-frame">
+              <svg id="angleSvg" class="angle-svg" viewBox="0 0 720 520" role="img" aria-labelledby="angleTitle angleDesc">
+                <title id="angleTitle">Two rays forming an angle</title>
+                <desc id="angleDesc">One ray is fixed. The other ray rotates from 0 degrees to 360 degrees to create different types of angles.</desc>
+              </svg>
+            </div>
+            <div class="current-strip" aria-label="current angle">
+              <div class="strip-item">
+                <span class="strip-label">Measure</span>
+                <span id="angleStrip" class="strip-value">120°</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Type</span>
+                <span id="typeStrip" class="strip-value">Obtuse</span>
+              </div>
+              <div class="strip-item">
+                <span class="strip-label">Turn</span>
+                <span id="turnStrip" class="strip-value">Between 1/4 and 1/2 turn</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="type-panel" aria-label="angle type ranges">
+            <div class="type-head">
+              <h3>Angle Types</h3>
+              <p class="prompt">Move the ray and watch the type change.</p>
+            </div>
+            <div class="type-list" id="typeList">
+              <div class="type-row" data-type="Acute">
+                <span class="type-dot" aria-hidden="true"></span>
+                <span>Acute</span>
+                <span class="type-range">0°-90°</span>
+              </div>
+              <div class="type-row" data-type="Right">
+                <span class="type-dot" aria-hidden="true"></span>
+                <span>Right</span>
+                <span class="type-range">90°</span>
+              </div>
+              <div class="type-row" data-type="Obtuse">
+                <span class="type-dot" aria-hidden="true"></span>
+                <span>Obtuse</span>
+                <span class="type-range">90°-180°</span>
+              </div>
+              <div class="type-row" data-type="Straight">
+                <span class="type-dot" aria-hidden="true"></span>
+                <span>Straight</span>
+                <span class="type-range">180°</span>
+              </div>
+              <div class="type-row" data-type="Reflex">
+                <span class="type-dot" aria-hidden="true"></span>
+                <span>Reflex</span>
+                <span class="type-range">180°-360°</span>
+              </div>
+            </div>
+            <div id="statusPill" class="pill status-pill" aria-live="polite">Target matched</div>
+          </aside>
+        </div>
+
+        <div class="legend" aria-label="concept summary">
+          <div class="legend-item">
+            <span class="legend-title">Fixed ray</span>
+            <span class="legend-value">Starts at 0°</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Rotating ray</span>
+            <span class="legend-value" id="rayLegend">Points to 120°</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-title">Notice</span>
+            <span class="legend-value" id="noticeLegend">Small angles are acute.</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="activity controls and observations">
+        <div class="panel-block">
+          <h2>Rotate Ray</h2>
+          <div class="slider-block">
+            <div class="slider-row">
+              <button class="step-button" type="button" data-step="-1" aria-label="decrease angle">-</button>
+              <label for="angleSlider">Angle</label>
+              <span id="angleNumber" class="slider-number">120°</span>
+              <button class="step-button" type="button" data-step="1" aria-label="increase angle">+</button>
+            </div>
+            <input id="angleSlider" type="range" min="0" max="360" step="1" value="120" aria-describedby="angleScale">
+            <div id="angleScale" class="scale-row" aria-hidden="true">
+              <span>0°</span>
+              <span>90°</span>
+              <span>180°</span>
+              <span>270°</span>
+              <span>360°</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="readout" aria-label="live angle values">
+          <div class="stat">
+            <span class="stat-label">Angle</span>
+            <span id="angleReadout" class="stat-value">120°</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Type</span>
+            <span id="typeReadout" class="stat-value">Obtuse</span>
+          </div>
+          <div class="stat full">
+            <span class="stat-label">Rule</span>
+            <span id="ruleReadout" class="stat-value small">Obtuse angle: more than 90° and less than 180°.</span>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="actions">
+            <button id="checkButton" type="button" class="action-button primary">Check</button>
+            <button id="resetButton" type="button" class="action-button warn">Reset</button>
+            <button id="hintButton" type="button" class="action-button">Hint</button>
+            <button id="newTargetButton" type="button" class="action-button">New Target</button>
+          </div>
+          <div class="preset-grid">
+            <button type="button" class="preset-button" data-angle="45">45°</button>
+            <button type="button" class="preset-button" data-angle="90">90°</button>
+            <button type="button" class="preset-button" data-angle="135">135°</button>
+            <button type="button" class="preset-button" data-angle="180">180°</button>
+            <button type="button" class="preset-button" data-angle="240">240°</button>
+            <button type="button" class="preset-button" data-angle="320">320°</button>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <h2>Observation</h2>
+          <div id="observationLine" class="observation-line" aria-live="polite">
+            This is an obtuse angle because it is bigger than 90° but smaller than 180°.
+          </div>
+          <div id="hintLine" class="hint-line" hidden>
+            Look at 90° and 180°. Acute is before 90°, obtuse is between 90° and 180°, and reflex is after 180°.
+          </div>
+        </div>
+
+        <div class="quiz-box" aria-label="quick question">
+          <h2>Quick Check</h2>
+          <p id="quizQuestion" class="quiz-question">What type of angle is exactly 90°?</p>
+          <div id="quizOptions" class="quiz-options"></div>
+          <div id="quizFeedback" class="quiz-feedback" aria-live="polite"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+  <script>
+    const targets = ["Acute", "Right", "Obtuse", "Straight", "Reflex"];
+    const targetExamples = {
+      Acute: 45,
+      Right: 90,
+      Obtuse: 135,
+      Straight: 180,
+      Reflex: 240
+    };
+
+    const state = {
+      angle: 120,
+      targetIndex: 0,
+      xp: 0,
+      completed: new Set(),
+      dragging: false
+    };
+
+    const scene = {
+      cx: 350,
+      cy: 278,
+      rayLength: 210,
+      arcRadius: 96,
+      boardRadius: 230
+    };
+
+    const els = {
+      angleSvg: document.getElementById("angleSvg"),
+      angleSlider: document.getElementById("angleSlider"),
+      angleNumber: document.getElementById("angleNumber"),
+      angleStrip: document.getElementById("angleStrip"),
+      typeStrip: document.getElementById("typeStrip"),
+      turnStrip: document.getElementById("turnStrip"),
+      rayLegend: document.getElementById("rayLegend"),
+      noticeLegend: document.getElementById("noticeLegend"),
+      angleReadout: document.getElementById("angleReadout"),
+      typeReadout: document.getElementById("typeReadout"),
+      ruleReadout: document.getElementById("ruleReadout"),
+      observationLine: document.getElementById("observationLine"),
+      hintLine: document.getElementById("hintLine"),
+      statusPill: document.getElementById("statusPill"),
+      targetValue: document.getElementById("targetValue"),
+      challengeTitle: document.getElementById("challengeTitle"),
+      challengePrompt: document.getElementById("challengePrompt"),
+      xpPill: document.getElementById("xpPill"),
+      typeList: document.getElementById("typeList"),
+      quizOptions: document.getElementById("quizOptions"),
+      quizFeedback: document.getElementById("quizFeedback"),
+      confettiLayer: document.getElementById("confettiLayer")
+    };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function formatAngle(value) {
+      return value + "°";
+    }
+
+    function typeForAngle(angle) {
+      if (angle > 0 && angle < 90) {
+        return "Acute";
+      }
+      if (angle === 90) {
+        return "Right";
+      }
+      if (angle > 90 && angle < 180) {
+        return "Obtuse";
+      }
+      if (angle === 180) {
+        return "Straight";
+      }
+      if (angle > 180 && angle < 360) {
+        return "Reflex";
+      }
+      if (angle === 360) {
+        return "Complete";
+      }
+      return "Zero";
+    }
+
+    function classForType(type) {
+      return type.toLowerCase();
+    }
+
+    function ruleForType(type) {
+      const rules = {
+        Acute: "Acute angle: more than 0° and less than 90°.",
+        Right: "Right angle: exactly 90°, like a square corner.",
+        Obtuse: "Obtuse angle: more than 90° and less than 180°.",
+        Straight: "Straight angle: exactly 180°, making a straight line.",
+        Reflex: "Reflex angle: more than 180° and less than 360°.",
+        Complete: "Complete angle: exactly 360°, one full turn.",
+        Zero: "Zero angle: 0°, no opening between the rays."
+      };
+      return rules[type];
+    }
+
+    function turnText(angle) {
+      if (angle === 0) {
+        return "No turn";
+      }
+      if (angle < 90) {
+        return "Less than 1/4 turn";
+      }
+      if (angle === 90) {
+        return "1/4 turn";
+      }
+      if (angle < 180) {
+        return "Between 1/4 and 1/2 turn";
+      }
+      if (angle === 180) {
+        return "1/2 turn";
+      }
+      if (angle < 360) {
+        return "More than 1/2 turn";
+      }
+      return "1 full turn";
+    }
+
+    function polar(radius, angle) {
+      const radians = angle * Math.PI / 180;
+      return {
+        x: scene.cx + Math.cos(radians) * radius,
+        y: scene.cy - Math.sin(radians) * radius
+      };
+    }
+
+    function arcPath(radius, angle) {
+      if (angle <= 0) {
+        return "";
+      }
+      if (angle >= 360) {
+        const top = scene.cy - radius;
+        const bottom = scene.cy + radius;
+        return "M " + scene.cx + " " + top + " A " + radius + " " + radius + " 0 1 0 " + scene.cx + " " + bottom + " A " + radius + " " + radius + " 0 1 0 " + scene.cx + " " + top;
+      }
+      const start = polar(radius, 0);
+      const end = polar(radius, angle);
+      const largeArc = angle > 180 ? 1 : 0;
+      return "M " + start.x.toFixed(2) + " " + start.y.toFixed(2) + " A " + radius + " " + radius + " 0 " + largeArc + " 0 " + end.x.toFixed(2) + " " + end.y.toFixed(2);
+    }
+
+    function sectorPath(radius, angle) {
+      if (angle <= 0) {
+        return "";
+      }
+      if (angle >= 360) {
+        return "";
+      }
+      const start = polar(radius, 0);
+      const end = polar(radius, angle);
+      const largeArc = angle > 180 ? 1 : 0;
+      return "M " + scene.cx + " " + scene.cy + " L " + start.x.toFixed(2) + " " + start.y.toFixed(2) + " A " + radius + " " + radius + " 0 " + largeArc + " 0 " + end.x.toFixed(2) + " " + end.y.toFixed(2) + " Z";
+    }
+
+    function tickMarkup() {
+      const ticks = [];
+      for (let angle = 0; angle < 360; angle += 15) {
+        const major = angle % 45 === 0;
+        const outer = polar(scene.boardRadius, angle);
+        const inner = polar(scene.boardRadius - (major ? 18 : 10), angle);
+        ticks.push('<line class="tick ' + (major ? "major" : "") + '" x1="' + inner.x.toFixed(1) + '" y1="' + inner.y.toFixed(1) + '" x2="' + outer.x.toFixed(1) + '" y2="' + outer.y.toFixed(1) + '"></line>');
+      }
+      [0, 90, 180, 270].forEach(function(angle) {
+        const p = polar(scene.boardRadius + 26, angle);
+        ticks.push('<text class="tick-label" x="' + p.x.toFixed(1) + '" y="' + (p.y + 4).toFixed(1) + '" text-anchor="middle">' + angle + '°</text>');
+      });
+      return ticks.join("");
+    }
+
+    function rightBoxMarkup() {
+      if (state.angle !== 90) {
+        return "";
+      }
+      const size = 40;
+      return '<path class="right-box" d="M ' + scene.cx + ' ' + scene.cy + ' H ' + (scene.cx + size) + ' V ' + (scene.cy - size) + ' H ' + scene.cx + ' Z"></path>';
+    }
+
+    function labelPosition(angle) {
+      if (angle >= 300 || angle <= 40) {
+        return { x: scene.cx + 86, y: scene.cy - 64 };
+      }
+      if (angle <= 170) {
+        return { x: scene.cx - 118, y: scene.cy - 122 };
+      }
+      if (angle <= 240) {
+        return { x: scene.cx - 152, y: scene.cy + 70 };
+      }
+      return { x: scene.cx + 82, y: scene.cy + 112 };
+    }
+
+    function renderSvg() {
+      const type = typeForAngle(state.angle);
+      const typeClass = classForType(type);
+      const movingEnd = polar(scene.rayLength, state.angle);
+      const baseEnd = polar(scene.rayLength, 0);
+      const label = labelPosition(state.angle);
+      const sector = sectorPath(scene.arcRadius, state.angle);
+      const arc = arcPath(scene.arcRadius, state.angle);
+      const sectorMarkup = state.angle === 360
+        ? '<circle class="sector complete" cx="' + scene.cx + '" cy="' + scene.cy + '" r="' + scene.arcRadius + '"></circle>'
+        : '<path class="sector ' + typeClass + '" d="' + sector + '"></path>';
+
+      els.angleSvg.innerHTML = [
+        '<defs>',
+        '<marker id="arrowHead" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">',
+        '<path d="M 0 0 L 11 5.5 L 0 11 z" fill="currentColor"></path>',
+        '</marker>',
+        '</defs>',
+        '<circle class="board-bg" cx="' + scene.cx + '" cy="' + scene.cy + '" r="' + scene.boardRadius + '"></circle>',
+        '<circle class="board-ring" cx="' + scene.cx + '" cy="' + scene.cy + '" r="' + scene.boardRadius + '"></circle>',
+        '<circle class="board-ring" cx="' + scene.cx + '" cy="' + scene.cy + '" r="' + scene.arcRadius + '"></circle>',
+        tickMarkup(),
+        sectorMarkup,
+        arc ? '<path class="arc ' + typeClass + '" d="' + arc + '"></path>' : "",
+        rightBoxMarkup(),
+        '<line class="ray" x1="' + scene.cx + '" y1="' + scene.cy + '" x2="' + baseEnd.x + '" y2="' + baseEnd.y + '"></line>',
+        '<line class="ray moving-ray" x1="' + scene.cx + '" y1="' + scene.cy + '" x2="' + movingEnd.x.toFixed(2) + '" y2="' + movingEnd.y.toFixed(2) + '"></line>',
+        '<line id="rayHit" class="ray-hit" tabindex="0" role="slider" aria-label="rotating ray" aria-valuemin="0" aria-valuemax="360" aria-valuenow="' + state.angle + '" x1="' + scene.cx + '" y1="' + scene.cy + '" x2="' + movingEnd.x.toFixed(2) + '" y2="' + movingEnd.y.toFixed(2) + '"></line>',
+        '<circle class="vertex" cx="' + scene.cx + '" cy="' + scene.cy + '" r="13"></circle>',
+        '<rect class="svg-label-bg" x="' + (label.x - 74) + '" y="' + (label.y - 24) + '" width="148" height="54" rx="8"></rect>',
+        '<text class="svg-small" x="' + label.x + '" y="' + (label.y - 3) + '" text-anchor="middle">Angle measure</text>',
+        '<text class="svg-label" x="' + label.x + '" y="' + (label.y + 18) + '" text-anchor="middle">' + formatAngle(state.angle) + ' - ' + type + '</text>'
+      ].join("");
+
+      const rayHit = document.getElementById("rayHit");
+      rayHit.addEventListener("pointerdown", beginDrag);
+      rayHit.addEventListener("keydown", rayKeydown);
+    }
+
+    function updateTypeList(type) {
+      els.typeList.querySelectorAll(".type-row").forEach(function(row) {
+        row.classList.toggle("is-active", row.dataset.type === type);
+      });
+    }
+
+    function updateChallenge() {
+      const target = targets[state.targetIndex];
+      els.targetValue.textContent = target;
+      els.challengeTitle.textContent = "Make a " + target.toLowerCase() + " angle";
+      if (target === "Right" || target === "Straight") {
+        els.challengePrompt.textContent = "Rotate the red ray until the angle is exactly " + targetExamples[target] + "°.";
+      } else if (target === "Acute") {
+        els.challengePrompt.textContent = "Rotate the red ray until the angle is more than 0° and less than 90°.";
+      } else if (target === "Obtuse") {
+        els.challengePrompt.textContent = "Rotate the red ray until the angle is more than 90° and less than 180°.";
+      } else {
+        els.challengePrompt.textContent = "Rotate the red ray until the angle is more than 180° and less than 360°.";
+      }
+    }
+
+    function observationFor(type) {
+      if (type === "Zero") {
+        return "The rays are on top of each other. There is no opening, so this is a zero angle.";
+      }
+      if (type === "Complete") {
+        return "The ray made one full turn and came back to the starting ray. That is a complete angle.";
+      }
+      if (type === "Acute") {
+        return "This is an acute angle because it is more than 0° and less than 90°.";
+      }
+      if (type === "Right") {
+        return "This is a right angle. It is exactly 90°, like the corner of a page.";
+      }
+      if (type === "Obtuse") {
+        return "This is an obtuse angle because it is bigger than 90° but smaller than 180°.";
+      }
+      if (type === "Straight") {
+        return "This is a straight angle. The two rays make one straight line at 180°.";
+      }
+      return "This is a reflex angle because it is bigger than 180° but smaller than 360°.";
+    }
+
+    function noticeFor(type) {
+      const notices = {
+        Acute: "Small angles are acute.",
+        Right: "A right angle is exactly 90°.",
+        Obtuse: "Obtuse angles are wider than right angles.",
+        Straight: "A straight angle makes a line.",
+        Reflex: "Reflex angles go past a straight angle.",
+        Complete: "360° is one full turn.",
+        Zero: "0° has no opening."
+      };
+      return notices[type];
+    }
+
+    function render() {
+      const type = typeForAngle(state.angle);
+      const angleText = formatAngle(state.angle);
+      const target = targets[state.targetIndex];
+      const matched = type === target;
+
+      renderSvg();
+      updateTypeList(type);
+      updateChallenge();
+      els.angleSlider.value = state.angle;
+      els.angleNumber.textContent = angleText;
+      els.angleStrip.textContent = angleText;
+      els.typeStrip.textContent = type;
+      els.turnStrip.textContent = turnText(state.angle);
+      els.rayLegend.textContent = "Points to " + angleText;
+      els.noticeLegend.textContent = noticeFor(type);
+      els.angleReadout.textContent = angleText;
+      els.typeReadout.textContent = type;
+      els.ruleReadout.textContent = ruleForType(type);
+      els.observationLine.textContent = observationFor(type);
+      els.xpPill.textContent = state.xp + " XP";
+      els.statusPill.classList.toggle("is-correct", matched);
+      els.statusPill.textContent = matched ? "Target matched" : "Try for " + target;
+      checkAutoAward(type);
+    }
+
+    function setAngle(value) {
+      state.angle = clamp(Math.round(value), 0, 360);
+      render();
+    }
+
+    function pointToAngle(event) {
+      const point = els.angleSvg.createSVGPoint();
+      point.x = event.clientX;
+      point.y = event.clientY;
+      const svgPoint = point.matrixTransform(els.angleSvg.getScreenCTM().inverse());
+      const dx = svgPoint.x - scene.cx;
+      const dy = scene.cy - svgPoint.y;
+      const raw = Math.atan2(dy, dx) * 180 / Math.PI;
+      return (raw + 360) % 360;
+    }
+
+    function beginDrag(event) {
+      if (event.button !== undefined && event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      state.dragging = true;
+      setAngle(pointToAngle(event));
+      document.addEventListener("pointermove", onDragMove);
+      document.addEventListener("pointerup", endDrag, { once: true });
+      document.addEventListener("pointercancel", cancelDrag, { once: true });
+    }
+
+    function onDragMove(event) {
+      if (!state.dragging) {
+        return;
+      }
+      setAngle(pointToAngle(event));
+    }
+
+    function endDrag() {
+      state.dragging = false;
+      document.removeEventListener("pointermove", onDragMove);
+      document.removeEventListener("pointercancel", cancelDrag);
+    }
+
+    function cancelDrag() {
+      state.dragging = false;
+      document.removeEventListener("pointermove", onDragMove);
+      document.removeEventListener("pointerup", endDrag);
+    }
+
+    function rayKeydown(event) {
+      if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setAngle(state.angle + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+        event.preventDefault();
+        setAngle(state.angle - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        setAngle(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        setAngle(360);
+      }
+    }
+
+    function checkAutoAward(type) {
+      const target = targets[state.targetIndex];
+      const key = target + ":" + state.angle;
+      if (type === target && !state.completed.has(key)) {
+        state.completed.add(key);
+        state.xp += 10;
+        els.xpPill.textContent = state.xp + " XP";
+        burstConfetti();
+      }
+    }
+
+    function burstConfetti() {
+      const colors = ["#2166a5", "#2f8f7a", "#d79b2d", "#d75b4c", "#6f5fb8"];
+      els.confettiLayer.innerHTML = "";
+      for (let i = 0; i < 24; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = (10 + Math.random() * 80) + "%";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = (Math.random() * 120) + "ms";
+        piece.style.transform = "rotate(" + (Math.random() * 180) + "deg)";
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(function() {
+        els.confettiLayer.innerHTML = "";
+      }, 1100);
+    }
+
+    function nextTarget() {
+      state.targetIndex = (state.targetIndex + 1) % targets.length;
+      render();
+    }
+
+    function checkAnswer() {
+      const type = typeForAngle(state.angle);
+      const target = targets[state.targetIndex];
+      if (type === target) {
+        els.observationLine.textContent = "Yes. " + formatAngle(state.angle) + " is a " + target.toLowerCase() + " angle.";
+        burstConfetti();
+      } else {
+        els.observationLine.textContent = "Not yet. This is " + type.toLowerCase() + ". Move the ray until it becomes " + target.toLowerCase() + ".";
+      }
+    }
+
+    function renderQuiz() {
+      const options = [
+        { label: "Right", right: true },
+        { label: "Acute", right: false },
+        { label: "Obtuse", right: false },
+        { label: "Reflex", right: false }
+      ];
+      els.quizOptions.innerHTML = "";
+      els.quizFeedback.textContent = "";
+      options.forEach(function(option) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "quiz-option";
+        button.textContent = option.label;
+        button.addEventListener("click", function() {
+          answerQuiz(option, button);
+        });
+        els.quizOptions.appendChild(button);
+      });
+    }
+
+    function answerQuiz(option, button) {
+      els.quizOptions.querySelectorAll(".quiz-option").forEach(function(item) {
+        item.classList.remove("is-right", "is-wrong");
+      });
+      button.classList.add(option.right ? "is-right" : "is-wrong");
+      els.quizFeedback.textContent = option.right
+        ? "Correct. A 90° angle is called a right angle."
+        : "Almost. 90° is a right angle, like a square corner.";
+    }
+
+    els.angleSlider.addEventListener("input", function(event) {
+      setAngle(Number(event.target.value));
+    });
+    document.querySelectorAll("[data-step]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setAngle(state.angle + Number(button.dataset.step));
+      });
+    });
+    document.querySelectorAll("[data-angle]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        setAngle(Number(button.dataset.angle));
+      });
+    });
+    document.getElementById("checkButton").addEventListener("click", checkAnswer);
+    document.getElementById("resetButton").addEventListener("click", function() {
+      state.targetIndex = 0;
+      setAngle(120);
+    });
+    document.getElementById("hintButton").addEventListener("click", function() {
+      els.hintLine.hidden = !els.hintLine.hidden;
+    });
+    document.getElementById("newTargetButton").addEventListener("click", nextTarget);
+
+    renderQuiz();
+    render();
+  </script>
+</body>
+</html>
